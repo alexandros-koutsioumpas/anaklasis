@@ -62,7 +62,7 @@ You may use the following **Binder** link in order to run _anaklasis_ inside _ju
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/alexandros-koutsioumpas/anaklasis/HEAD?filepath=templates_binder)
 
-You may find templates for calculations and refinements in the form of _jupyter notebooks_ that you can modify according to your needs. You may also upload data files in order to use them in your refinements.
+You may find templates for calculations and refinements in the form of _jupyter notebooks_ that you can modify according to your needs. You may also upload data files in order to use them in your refinements. Resources on **Binder** are a bit limited but you are able to experiment with _anaklasis_ without performing a local installation on your machine.
 
 ## Getting help
 
