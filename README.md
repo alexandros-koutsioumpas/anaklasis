@@ -56,6 +56,13 @@ pacman -S mingw64/mingw-w64-x86_64-gcc-fortran
 py setup.py install build_ext --compiler=mingw32
 ```
 
+## Running _anaklasis_ in the cloud
+
+You may user the following **Binder** link in order to run _anaklasis_ inside _jupyter notebooks_.
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/alexandros-koutsioumpas/anaklasis/HEAD?filepath=templates_binder)
+
+You may find templates for calculations and refinements in the form of _jupyter notebooks_ that you can modify according to your needs. You may also upload data files in order to use them in your refinements.
 
 ## Getting help
 
@@ -84,4 +91,4 @@ ulimit -n 2048
 ## License
 [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/alexandros-koutsioumpas/anaklasis/HEAD?filepath=templates_binder)
+
