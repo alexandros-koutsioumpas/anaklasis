@@ -1,10 +1,6 @@
-channels:
-    - conda-forge
 dependencies:
     - python
-    - pip
     - numpy
-    - setuptools
     - matplotlib
     - scipy
     - numdifftools
