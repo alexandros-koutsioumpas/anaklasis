@@ -1,0 +1,15 @@
+channels:
+    - conda-forge
+dependencies:
+    - python
+    - pip
+    - numpy
+    - setuptools
+    - matplotlib
+    - jupyterlab
+    - scipy
+    - numdifftools
+    - sympy
+    - emcee
+    - tqdm
+    - corner
