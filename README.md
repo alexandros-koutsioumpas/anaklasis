@@ -84,4 +84,4 @@ ulimit -n 2048
 ## License
 [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/alexandros-koutsioumpas/anaklasis/HEAD)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/alexandros-koutsioumpas/anaklasis/HEAD?filepath=templates_binder)
