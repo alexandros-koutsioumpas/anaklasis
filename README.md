@@ -58,7 +58,7 @@ py setup.py install build_ext --compiler=mingw32
 
 ## Running _anaklasis_ in the cloud
 
-You may use the following **Binder** link in order to run _anaklasis_ inside _jupyter notebooks_.
+You may use the following **Binder** link in order to perform _anaklasis_ calculations inside _jupyter notebooks_ that run on the cloud .
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/alexandros-koutsioumpas/anaklasis/HEAD?filepath=templates_binder)
 
