@@ -21,7 +21,7 @@ python3 setup.py install --user
 **macOS**
 
 - Install _python_ > 3.7 from [python.org](https://www.python.org/downloads/)
-- Install _gfortran_ compiler. An easy way is to use the installers provided by @fxcoudert at [github](https://github.com/fxcoudert/gfortran-for-macOS)
+- Install _gfortran_ compiler. An easy way is to use the installers provided by **fxcoudert** at [github](https://github.com/fxcoudert/gfortran-for-macOS)
 - Install NumPy  
 
 ```bash
