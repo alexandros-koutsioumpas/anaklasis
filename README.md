@@ -8,7 +8,7 @@ Full description of used methods will be reported in the form of an open-access 
 
 ## Installation
 
-##Linux
+**Linux**
 
 - Install _Python_ > 3.7 and _gfortran_
 - Install NumPy
@@ -18,7 +18,7 @@ Full description of used methods will be reported in the form of an open-access 
 python3 setup.py install --user
 ```
 
-##macOS
+**macOS**
 
 - Install _python_ > 3.7 from [python.org](https://www.python.org/downloads/)
 - Install _gfortran_ compiler. An easy way is to use the installers provided by _fxcoudert_ at [github](https://github.com/fxcoudert/gfortran-for-macOS)
@@ -34,7 +34,7 @@ python3 -m pip install numpy
 python3 setup.py install
 ```
 
-##Windows
+**Windows**
 
 - Install _python_ > 3.7 from [python.org](https://www.python.org/downloads/) and do not forget to include _python_ in the systen path.
 - Install NumPy and upgrade setuptools
