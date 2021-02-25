@@ -6,7 +6,6 @@ dependencies:
     - numpy
     - setuptools
     - matplotlib
-    - jupyterlab
     - scipy
     - numdifftools
     - sympy
