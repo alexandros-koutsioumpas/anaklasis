@@ -55,8 +55,8 @@ background = [
 	]
 # scaling of the curve left slightly free
 scale = [
-	[0.9,1.1,'uniform'],
-	[0.9,1.1,'uniform'],
+	[1.0,1.0,'uniform'],
+	[1.0,1.0,'uniform'],
 	]
 
 res = anaklasis.fit(project, in_file, units, fit_mode, fit_weight, method, resolution, patches, system, 
