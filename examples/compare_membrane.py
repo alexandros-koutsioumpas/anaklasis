@@ -2,7 +2,7 @@ from anaklasis import anaklasis
 
 project='membrane_ref_data_comparison'
 
-input_file = ['membrane.dat'] # input curve
+input_file = 'membrane.dat' # input curve
 units = ['A'] # Q units in Angstrom
 
 patches=[1.0] # single patch 100% covergae
