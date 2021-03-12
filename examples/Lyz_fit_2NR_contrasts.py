@@ -1,4 +1,4 @@
-# 2-contrast neutron reflectometry fit, for a supported lipid bilayer at the Si/water interface
+# 2-contrast neutron reflectometry fit, from an adsorbed Lysozyme layer at the Si/water interface
 from anaklasis import anaklasis
 
 project='Lyz_fit_2_contrasts'
