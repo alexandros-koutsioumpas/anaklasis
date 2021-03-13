@@ -25,7 +25,7 @@ system.append([
 	])
 
 # Approximate solvent volume fraction integral using a sum.
-expr="""Sum(((1/(p2*(2*pi)**0.5))*exp(-0.5*(((p1+(ii/10)*p2)-p1)/p2)**2))
+expr="""Sum(((1/(p2*(2*pi)**0.5))*exp(-0.5*(((p1+(ii/10)*p2)-p1)/p2)**2))*
 Min(1-(p0-(4*p0/(p1+(ii/10)*p2)**2)*((n-0.5)*(p1/100)-(p1+(ii/10)*p2)/2)**2),1)
 *(p2/10),(ii,-30,30))"""
 
