@@ -10,7 +10,7 @@ ext = [Extension(name='fortran_ref',
 
 setup(
 	name='anaklasis',
-	version='1.2',
+	version='1.3',
 	author='Alexandros Koutsioumpas',
 	author_email='a.koutsioumpas@fz-juelich.de',
 	description='Neutron and X-ray reflectivity calculations',
@@ -26,4 +26,6 @@ setup(
     python_requires='>=3.7',
     install_requires=['numpy>=1.18','scipy>=1.4','matplotlib','numdifftools>=0.9.39','sympy>=1.6.2','emcee>=3.0','tqdm','corner'],
 	)
+
+
 
