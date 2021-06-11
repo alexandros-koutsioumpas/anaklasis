@@ -84,6 +84,14 @@ In case you prefer *Anaconda* on *Windows* [here are instructions](https://pytho
 
 An additional option for Windows 10 users is to use the Windows Subsystem for Linux (WSL), install a Linux distribution (like Ubuntu) and follow the installation instructions presented above for Linux.
 
+## Running _anaklasis_ in the cloud
+
+You may use the following **Binder** link in order to perform _anaklasis_ calculations inside _jupyter notebooks_ that run on the cloud .
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/alexandros-koutsioumpas/anaklasis/HEAD?filepath=templates_binder)
+
+You may find templates for calculations and refinements in the form of _jupyter notebooks_ that you can modify according to your needs. You may also upload data files in order to use them in your refinements. Resources on **Binder** are a bit limited but you are able to experiment with _anaklasis_ without performing a local installation on your machine.
+
 ## Getting help
 
 In the `/docs` folder you may find the program's API in various formats.
