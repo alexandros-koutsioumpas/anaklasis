@@ -82,12 +82,13 @@ import shutil
 import time
 from multiprocessing import Pool
 import multiprocessing
+from joblib import Parallel, delayed
 from scipy.optimize import differential_evolution
 from scipy.optimize import minimize
 import scipy
 import warnings
 from scipy import special
-from fortran_ref import f_realref
+from fortran_ref import f_realref,f_profilecalc,f_solventcalc
 # if os.name == 'nt':
 # 	spath=np.__file__
 # 	extra_dll_dir = os.path.join(spath[:-17], 'fortran_ref\.libs')
@@ -195,33 +196,40 @@ def profile(LayerMatrix, npoints):
 		z_bin = np.linspace(-4*LayerMatrix[j][0][3]-5.0, global_total_d+4*LayerMatrix[j][len(LayerMatrix[j])-2][3]+5.0, npoints+1)
 		for i in range(len(z_bin)-1):
 			Profile[j][i][0]=z_bin[i]
-			Profile[j][i][1]=calc_profile(z_bin[i],LayerMatrix[j], len(LayerMatrix[j])-2)
+			#Profile[j][i][1]=calc_profile(z_bin[i],LayerMatrix[j], len(LayerMatrix[j])-2)
+			Profile[j][i][1]=f_profilecalc(z_bin[i],[a[0:5] for a in LayerMatrix[j]], len(LayerMatrix[j])-2)
 
 	return Profile
 
-def Reflectivity(q_bin,res_bin, LayerMatrix, resolution,bkg,scale,patches):
+
+def pointRef(i,q_bin,res_bin, LayerMatrix, resolution,bkg,scale,patches):
+	p_ref=0
+	for j in range(len(LayerMatrix)):
+		if resolution == -1:
+			p_ref=p_ref+patches[j]*scale*f_realref(0,q_bin[i],res_bin[i]/q_bin[i],[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)+bkg
+		else:
+			p_ref=p_ref+patches[j]*scale*f_realref(0,q_bin[i],res_bin[i],[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)+bkg
+	return p_ref
+
+def Reflectivity(q_bin,res_bin, LayerMatrix, resolution,bkg,scale,patches,mp):
 	"""Internal anaklasis fuction"""
 	# Given a Q bin 1-d array, layer model (LayerMatrix) and instrumental resolution  calculate the specular reflectivity
 	# and return an array with Q, R(Q), R(Q)Q^4 
-	#import numpy as np
+	# with mp=-1 all cores are used, with mp=1 only one core
 	Refl=np.zeros([len(q_bin), 3])
 	Refl[:,0]=np.array(q_bin)
+
+	if mp == -1:
+		num_cores = multiprocessing.cpu_count() # all cores
+	else:
+		num_cores = 1 # single core
+		
+
+	Refl[:,1]=np.array(Parallel(n_jobs=num_cores)(delayed(pointRef)(i,q_bin,res_bin, LayerMatrix, resolution,bkg,scale,patches) for i in range(len(q_bin))))
+
 	for i in range(len(q_bin)):
-		#Refl[i][0]=q_bin[i]
-		#This is for f2py
-		#Refl[i][1]=0.0
-		#Refl[i][2]=0.0
-		for j in range(len(LayerMatrix)):
-			#flayers = np.array(LayerMatrix[j])
-			#print([a[0:5] for a in LayerMatrix[j]])
-			#print(flayers)
-			if resolution == -1:
-				Refl[i][1]=Refl[i][1]+patches[j]*scale*f_realref(0,q_bin[i],res_bin[i]/q_bin[i],[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)+bkg
-			else:
-				Refl[i][1]=Refl[i][1]+patches[j]*scale*f_realref(0,q_bin[i],res_bin[i],[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)+bkg
-			#The following line for pure Python calculation
-			#Refl[i][1]=real_refl(q_bin[i], LayerMatrix, np.size(LayerMatrix,0)-2, res_bin[i])
-		Refl[i][2]=Refl[i][1]*np.power(Refl[i][0],4)  # q_bin[i]**4
+		Refl[i][2]=Refl[i][1]*np.power(Refl[i][0],4)
+
 
 	return Refl
 
@@ -245,7 +253,8 @@ def solvent_penetration(LayerMatrix, npoints):
 		z_bin = np.linspace(-4*LayerMatrix[j][0][3]-5.0, global_total_d+4*LayerMatrix[j][len(LayerMatrix[j])-2][3]+5.0, npoints+1)
 		for i in range(len(z_bin)-1):
 			Profile[j][i][0]=z_bin[i]
-			Profile[j][i][1]=calc_solvent_penetration(z_bin[i],LayerMatrix[j], len(LayerMatrix[j])-2)
+			#Profile[j][i][1]=calc_solvent_penetration(z_bin[i],LayerMatrix[j], len(LayerMatrix[j])-2) # Python
+			Profile[j][i][1]=f_solventcalc(z_bin[i],[a[0:5] for a in LayerMatrix[j]], len(LayerMatrix[j])-2) #Fortran
 
 	return Profile
 
@@ -275,6 +284,7 @@ def chi_square(data, LayerMatrix, resolution, bkg, scale, patches):
 					#flayers = np.array(LayerMatrix[j])
 					chi=chi+patches[j]*(1.0/float(Nexp))*((data[i][1]-scale*f_realref(0,data[i][0],data[i][3]/data[i][0],[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)-bkg)/(data[i][2]))**2
 	return chi
+
 
 
 def fig_of_merit_sym(x, *argv):
@@ -407,6 +417,8 @@ def fig_of_merit_sym(x, *argv):
 
 	return fom
 
+
+
 def reduced_chi_sym(x, *argv):
 	"""Internal anaklasis fuction"""
 	#
@@ -505,6 +517,7 @@ def reduced_chi_sym(x, *argv):
 		fom=fom+h1*fit_weight[curve]/sum_weight
 
 	return fom
+
 
 
 def log_likelihood(theta, *argv):
@@ -1393,7 +1406,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 
 	print('--------------------------------------------------------------------')
 	print('Program ANAKLASIS - Fit Module for X-ray/Neutron reflection datasets')
-	print('version 1.3, June 2021')
+	print('version 1.4, June 2021')
 	print('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ')
 	print('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de')
 	print('--------------------------------------------------------------------')
@@ -1945,7 +1958,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 		mnlayers=[]
 		for i in range(len(layers_min)):
 			mnlayers.append(np.size(layers_min[i],0))
-		df=nd.Hessdiag(reduced_chi_sym,num_steps=50)(de_results,data,resolution,mnlayers,m_param,layers_max,model_param,fit_mode,num_curves,c_param,multi_param,f_layer_fun,fit_weight,patches,free_param)
+		df=nd.Hessdiag(reduced_chi_sym)(de_results,data,resolution,mnlayers,m_param,layers_max,model_param,fit_mode,num_curves,c_param,multi_param,f_layer_fun,fit_weight,patches,free_param)
 
 		df_counter=0
 		df_layers=[]
@@ -2075,10 +2088,10 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 				res_bin[curve][i] = np.interp(q_bin[curve][i], data[curve][:,0],data[curve][:,3])
 
 
-		Refl2.append(Reflectivity(data[curve][:,0], data[curve][:,3], layers, resolution[curve],bkg,scl,patches)) # needed for bootstrapping
+		Refl2.append(Reflectivity(data[curve][:,0], data[curve][:,3], layers, resolution[curve],bkg,scl,patches,mp)) # needed for bootstrapping
 
 
-		Refl.append(Reflectivity(q_bin[curve], res_bin[curve], layers, resolution[curve],bkg,scl,patches))
+		Refl.append(Reflectivity(q_bin[curve], res_bin[curve], layers, resolution[curve],bkg,scl,patches,mp))
 
 		Profile.append(profile(layers, 1000))
 
@@ -2373,10 +2386,10 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 						layers.append(sub_layers)
 
 
-					cRefl=Reflectivity(q_bin[curve],res_bin[curve], layers, resolution[curve], bkg, scl,patches)
+					cRefl=Reflectivity(q_bin[curve],res_bin[curve], layers, resolution[curve], bkg, scl,patches,mp)
 					samples_Refl[curve,:,m+1]=cRefl[:,1]
 					samples_Refl2[curve][:,0]=data[curve][:,0]
-					samples_Refl2[curve][:,m+1]=Reflectivity(data[curve][:,0],data[curve][:,3], layers, resolution[curve], bkg, scl,patches)[:,1]
+					samples_Refl2[curve][:,m+1]=Reflectivity(data[curve][:,0],data[curve][:,3], layers, resolution[curve], bkg, scl,patches,mp)[:,1]
 					cProfile=profile(layers, 1000)
 					for j in range(len(layers_min)):
 						samples_Profile[curve,j,:,2*m]=cProfile[j][:,0]
@@ -2676,10 +2689,10 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 				scl=results.x[sum(mnlayers)*5+m_param+num_curves+curve]
 
 
-				cRefl=Reflectivity(q_bin[curve],res_bin[curve], layers, resolution[curve], bkg,scl,patches)
+				cRefl=Reflectivity(q_bin[curve],res_bin[curve], layers, resolution[curve], bkg,scl,patches,mp)
 				samples_Refl[curve,:,i+1]=cRefl[:,1]
 				samples_Refl2[curve][:,0]=data[curve][:,0]
-				samples_Refl2[curve][:,i+1]=Reflectivity(data[curve][:,0],data[curve][:,3], layers, resolution[curve], bkg, scl, patches)[:,1]
+				samples_Refl2[curve][:,i+1]=Reflectivity(data[curve][:,0],data[curve][:,3], layers, resolution[curve], bkg, scl, patches,mp)[:,1]
 				cProfile=profile(layers, 1000)
 				for j in range(len(layers_min)):
 					samples_Profile[curve,j,:,2*i]=cProfile[j][:,0]
@@ -3132,7 +3145,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 		f = open(project+"_final_parameters.log", "w")
 		f.write('--------------------------------------------------------------------\n')
 		f.write('Program ANAKLASIS - Fit Module for X-ray/Neutron reflection datasets\n')
-		f.write('version 1.3, June 2021\n')
+		f.write('version 1.4, June 2021\n')
 		f.write('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ\n')
 		f.write('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de\n')
 		f.write('--------------------------------------------------------------------\n')
@@ -3911,9 +3924,16 @@ def calculate(project,resolution, patches, system, system_param, background, sca
 
 	#np.warnings.filterwarnings('error', category=np.VisibleDeprecationWarning) 
 
+	if os.name == 'posix':
+		if multiprocessing.get_start_method(allow_none=True) != 'fork':
+			multiprocessing.set_start_method('fork') # This is needed for Pyhton versions above 3.7!!!!!
+		mp=-1
+	else:
+		mp=1
+
 	print('--------------------------------------------------------------------')
 	print('Program ANAKLASIS - Calculation Module for X-ray/Neutron reflection ')
-	print('version 1.3, June 2021')
+	print('version 1.4, June 2021')
 	print('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ')
 	print('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de')
 	print('--------------------------------------------------------------------')
@@ -4008,7 +4028,7 @@ def calculate(project,resolution, patches, system, system_param, background, sca
 		f = open(project+"_calculation_parameters.log", "w")
 		f.write('--------------------------------------------------------------------\n')
 		f.write('Program ANAKLASIS - Calculation Module for X-ray/Neutron reflection \n')
-		f.write('version 1.3, June 2021\n')
+		f.write('version 1.4, June 2021\n')
 		f.write('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ\n')
 		f.write('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de\n')
 		f.write('--------------------------------------------------------------------\n')
@@ -4047,8 +4067,7 @@ def calculate(project,resolution, patches, system, system_param, background, sca
 	for i in range(np.size(res_bin,0)):
 		res_bin[i] = resolution[0]
 
-
-	Refl=Reflectivity(q_bin, res_bin, layers, resolution[0], np.float(background[0]),scale[0],patches)
+	Refl=Reflectivity(q_bin, res_bin, layers, resolution[0], np.float(background[0]),scale[0],patches,mp)
 
 	Profile=profile(layers, 1000)
 
@@ -4534,9 +4553,16 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 
 	#np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)  
 
+	if os.name == 'posix':
+		if multiprocessing.get_start_method(allow_none=True) != 'fork':
+			multiprocessing.set_start_method('fork') # This is needed for Pyhton versions above 3.7!!!!!
+		mp=-1
+	else:
+		mp=1
+
 	print('--------------------------------------------------------------------')
 	print('Program ANAKLASIS - Comparison Module for X-ray/Neutron reflection ')
-	print('version 1.3, June 2021')
+	print('version 1.4, June 2021')
 	print('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ')
 	print('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de')
 	print('--------------------------------------------------------------------')
@@ -4693,7 +4719,7 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 		f = open(project+"_comparison_parameters.log", "w")
 		f.write('--------------------------------------------------------------------\n')
 		f.write('Program ANAKLASIS - Comparison Module for X-ray/Neutron reflection \n')
-		f.write('version 1.3, June 2021\n')
+		f.write('version 1.4, June 2021\n')
 		f.write('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ\n')
 		f.write('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de\n')
 		f.write('--------------------------------------------------------------------\n')
@@ -4738,8 +4764,8 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 
 	#print(res_bin)
 
-	Refl=Reflectivity(q_bin, res_bin, layers, resolution[0], np.float(background[0]),scale[0],patches)
-	Refl2=Reflectivity(data[:,0], data[:,3], layers, resolution[0], np.float(background[0]),scale[0],patches)
+	Refl=Reflectivity(q_bin, res_bin, layers, resolution[0], np.float(background[0]),scale[0],patches,mp)
+	Refl2=Reflectivity(data[:,0], data[:,3], layers, resolution[0], np.float(background[0]),scale[0],patches,mp)
 
 	Profile=profile(layers, 1000)
 

@@ -167,3 +167,118 @@ contains
     !************************************************************************************
 END SUBROUTINE
 
+!************************************************************************************
+SUBROUTINE f_profilecalc(z, LayerMatrix, Nlayers,fProfile)
+!z, distance from the surface along the z axis
+!LayerMatrix, matrix containing the real (1st column) and imaginary (2nd column) scattering
+! length density of each layer. The 3rd column corresponds to the thickness (A) of
+! each layer and the 4th column to the roughness (A). 5th column layer hydration
+! row 1 and Nlayers+1 concern the fronting and backing material respectively
+! Nlayers, Number of layers in the model
+IMPLICIT NONE
+real(8), intent(in) :: z                       ! distance from the surface along the z axis
+real(8), dimension(0:Nlayers+1,0:4), intent(in) :: LayerMatrix
+                                               ! Matrix containing the real (1st column) and imaginary (2nd column) scattering
+                                               ! length density of each layer. The 3rd column corresponds to the thickness (A) of
+                                               ! each layer and the 4th column to the roughness (A).
+                                               ! row 1 and Nlayers+1 concern the fronting and backing 
+integer, intent(in) :: Nlayers                 ! Number of layers in the model
+real(8), intent(out) :: fProfile
+!---------------------------------------------------------------------
+INTEGER i,j                                    ! counter
+real(8) zi,lmi1,lmi2,rho
+
+rho=LayerMatrix(0,0)
+do i=2,Nlayers+2
+	zi=0
+	do j=1,i-1
+		zi=zi+LayerMatrix(j-1,2)
+	enddo
+
+	if(LayerMatrix(Nlayers+1,4).EQ.1.0D0.AND.LayerMatrix(0,4).EQ.0.0D0) then
+		lmi1=LayerMatrix(i-1,0)*(1.0-LayerMatrix(i-1,4))+LayerMatrix(Nlayers+1,0)*LayerMatrix(i-1,4)
+		lmi2=LayerMatrix(i-2,0)*(1.0-LayerMatrix(i-2,4))+LayerMatrix(Nlayers+1,0)*LayerMatrix(i-2,4)
+	endif
+	if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.1.0D0) then
+		lmi1=LayerMatrix(i-1,0)*(1.0-LayerMatrix(i-1,4))+LayerMatrix(0,0)*LayerMatrix(i-1,4)
+		lmi2=LayerMatrix(i-2,0)*(1.0-LayerMatrix(i-2,4))+LayerMatrix(0,0)*LayerMatrix(i-2,4)
+	endif
+	if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.0.0D0) then
+		lmi1=LayerMatrix(i-1,0)
+		lmi2=LayerMatrix(i-2,0)
+	endif
+
+	if(LayerMatrix(i-2,3).NE.0.0D0) then
+		rho=rho+((lmi1-lmi2)/2.0D0)*(1.0D0+erf((z-zi)/(sqrt(2.0D0)*LayerMatrix(i-2,3))))
+	else
+		if(z.GE.zi) then
+			rho=rho+((lmi1-lmi2)/2.0D0)*(2.0D0)
+		else
+			rho=rho+0.0D0	
+		endif
+	endif
+enddo
+
+fProfile=rho
+
+END SUBROUTINE
+
+!************************************************************************************
+SUBROUTINE f_solventcalc(z, LayerMatrix, Nlayers,fsolvent)
+!z, distance from the surface along the z axis
+!LayerMatrix, matrix containing the real (1st column) and imaginary (2nd column) scattering
+! length density of each layer. The 3rd column corresponds to the thickness (A) of
+! each layer and the 4th column to the roughness (A). 5th column layer hydration
+! row 1 and Nlayers+1 concern the fronting and backing material respectively
+! Nlayers, Number of layers in the model
+IMPLICIT NONE
+real(8), intent(in) :: z                       ! distance from the surface along the z axis
+real(8), dimension(0:Nlayers+1,0:4), intent(in) :: LayerMatrix
+                                               ! Matrix containing the real (1st column) and imaginary (2nd column) scattering
+                                               ! length density of each layer. The 3rd column corresponds to the thickness (A) of
+                                               ! each layer and the 4th column to the roughness (A).
+                                               ! row 1 and Nlayers+1 concern the fronting and backing 
+integer, intent(in) :: Nlayers                 ! Number of layers in the model
+real(8), intent(out) :: fsolvent
+!---------------------------------------------------------------------
+real(8) rho,zi,lmi1,lmi2
+integer i,j
+
+
+if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.0.0D0) then
+	rho=0.0
+else
+	if(LayerMatrix(Nlayers+1,4).EQ.1.0D0.AND.LayerMatrix(0,4).EQ.0.0D0) rho=0.0
+	if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.1.0D0) rho=1.0
+
+	do i=2,Nlayers+2
+		zi=0
+		do j=1,i-1
+			zi=zi+LayerMatrix(j-1,2)
+		enddo
+
+		if(LayerMatrix(Nlayers+1,4).EQ.1.0D0.AND.LayerMatrix(0,4).EQ.0.0D0) then
+			lmi1=LayerMatrix(i-1,4)
+			lmi2=LayerMatrix(i-2,4)
+		endif
+		if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.1.0D0) then
+			lmi1=LayerMatrix(i-1,4)
+			lmi2=LayerMatrix(i-2,4)
+		endif
+
+		if(LayerMatrix(i-2,3).NE.0.0D0) then
+			rho=rho+((lmi1-lmi2)/2.0)*(1.0+erf((z-zi)/(sqrt(2.0)*LayerMatrix(i-2,3))))
+		else
+			if(z.GT.zi) then
+				rho=rho+((lmi1-lmi2)/2.0)*(2.0)
+			else
+				rho=rho+0.0D0
+			endif
+		endif	
+	enddo
+
+endif
+
+fsolvent=rho
+
+END SUBROUTINE
