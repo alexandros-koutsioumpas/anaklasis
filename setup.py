@@ -24,7 +24,7 @@ setup(
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
        ],
     python_requires='>=3.7',
-    install_requires=['numpy>=1.18','scipy>=1.4','matplotlib','numdifftools>=0.9.39','sympy>=1.6.2','emcee>=3.0','tqdm','corner'],
+    install_requires=['numpy>=1.18','scipy>=1.4','matplotlib','numdifftools>=0.9.39','sympy>=1.6.2','emcee>=3.0','tqdm','corner','joblib'],
 	)
 
 
