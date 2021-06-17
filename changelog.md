@@ -1,6 +1,6 @@
 # anaklasis changelog
 
-## Version 1.4 (June 2021)
+## Version 1.4 and 1.4b (June 2021)
 
 - Single curve calculations now use all availlable cores on MacOS and Linux
 - Sld and solvent profiles now calculated with Fortran extension (faster)
