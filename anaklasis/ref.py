@@ -223,7 +223,6 @@ def Reflectivity(q_bin,res_bin, LayerMatrix, resolution,bkg,scale,patches,mp):
 		num_cores = multiprocessing.cpu_count() # all cores
 	else:
 		num_cores = 1 # single core
-	num_cores =1
 
 	Refl[:,1]=np.array(Parallel(n_jobs=num_cores)(delayed(pointRef)(i,q_bin,res_bin, LayerMatrix, resolution,bkg,scale,patches) for i in range(len(q_bin))))
 
