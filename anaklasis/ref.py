@@ -82,7 +82,6 @@ import shutil
 import time
 from multiprocessing import Pool
 import multiprocessing
-from joblib import Parallel, delayed
 from scipy.optimize import differential_evolution
 from scipy.optimize import minimize
 import scipy
