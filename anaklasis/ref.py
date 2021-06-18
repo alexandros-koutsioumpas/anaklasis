@@ -223,11 +223,34 @@ def Reflectivity(q_bin,res_bin, LayerMatrix, resolution,bkg,scale,patches,mp):
 		num_cores = multiprocessing.cpu_count() # all cores
 	else:
 		num_cores = 1 # single core
+		
 
-	Refl[:,1]=np.array(Parallel(n_jobs=num_cores)(delayed(pointRef)(i,q_bin,res_bin, LayerMatrix, resolution,bkg,scale,patches) for i in range(len(q_bin))))
-
-	for i in range(len(q_bin)):
-		Refl[i][2]=Refl[i][1]*np.power(Refl[i][0],4)
+	#Refl[:,1]=np.array(Parallel(n_jobs=num_cores)(delayed(pointRef)(i,q_bin,res_bin, LayerMatrix, resolution,bkg,scale,patches) for i in range(len(q_bin))))
+	if mp == -1:
+		pool = Pool(num_cores)
+		myargs=[]
+		for i in range(len(q_bin)):
+			myargs.append((i,q_bin,res_bin, LayerMatrix, resolution,bkg,scale,patches))
+		Refl[:,1]=pool.starmap(pointRef, myargs)
+		for i in range(len(q_bin)):
+			Refl[i][2]=Refl[i][1]*np.power(Refl[i][0],4)
+	else:
+		for i in range(len(q_bin)):
+			#Refl[i][0]=q_bin[i]
+			#This is for f2py
+			#Refl[i][1]=0.0
+			#Refl[i][2]=0.0
+			for j in range(len(LayerMatrix)):
+				#flayers = np.array(LayerMatrix[j])
+				#print([a[0:5] for a in LayerMatrix[j]])
+				#print(flayers)
+				if resolution == -1:
+					Refl[i][1]=Refl[i][1]+patches[j]*scale*f_realref(0,q_bin[i],res_bin[i]/q_bin[i],[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)+bkg
+				else:
+					Refl[i][1]=Refl[i][1]+patches[j]*scale*f_realref(0,q_bin[i],res_bin[i],[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)+bkg
+				#The following line for pure Python calculation
+				#Refl[i][1]=real_refl(q_bin[i], LayerMatrix, np.size(LayerMatrix,0)-2, res_bin[i])
+			Refl[i][2]=Refl[i][1]*np.power(Refl[i][0],4)  # q_bin[i]**4		
 
 
 	return Refl
@@ -1405,7 +1428,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 
 	print('--------------------------------------------------------------------')
 	print('Program ANAKLASIS - Fit Module for X-ray/Neutron reflection datasets')
-	print('version 1.4, June 2021')
+	print('version 1.4.5, June 2021')
 	print('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ')
 	print('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de')
 	print('--------------------------------------------------------------------')
@@ -3144,7 +3167,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 		f = open(project+"_final_parameters.log", "w")
 		f.write('--------------------------------------------------------------------\n')
 		f.write('Program ANAKLASIS - Fit Module for X-ray/Neutron reflection datasets\n')
-		f.write('version 1.4, June 2021\n')
+		f.write('version 1.4.5, June 2021\n')
 		f.write('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ\n')
 		f.write('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de\n')
 		f.write('--------------------------------------------------------------------\n')
@@ -3932,7 +3955,7 @@ def calculate(project,resolution, patches, system, system_param, background, sca
 
 	print('--------------------------------------------------------------------')
 	print('Program ANAKLASIS - Calculation Module for X-ray/Neutron reflection ')
-	print('version 1.4, June 2021')
+	print('version 1.4.5, June 2021')
 	print('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ')
 	print('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de')
 	print('--------------------------------------------------------------------')
@@ -4027,7 +4050,7 @@ def calculate(project,resolution, patches, system, system_param, background, sca
 		f = open(project+"_calculation_parameters.log", "w")
 		f.write('--------------------------------------------------------------------\n')
 		f.write('Program ANAKLASIS - Calculation Module for X-ray/Neutron reflection \n')
-		f.write('version 1.4, June 2021\n')
+		f.write('version 1.4.5, June 2021\n')
 		f.write('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ\n')
 		f.write('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de\n')
 		f.write('--------------------------------------------------------------------\n')
@@ -4561,7 +4584,7 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 
 	print('--------------------------------------------------------------------')
 	print('Program ANAKLASIS - Comparison Module for X-ray/Neutron reflection ')
-	print('version 1.4, June 2021')
+	print('version 1.4.5, June 2021')
 	print('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ')
 	print('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de')
 	print('--------------------------------------------------------------------')
@@ -4718,7 +4741,7 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 		f = open(project+"_comparison_parameters.log", "w")
 		f.write('--------------------------------------------------------------------\n')
 		f.write('Program ANAKLASIS - Comparison Module for X-ray/Neutron reflection \n')
-		f.write('version 1.4, June 2021\n')
+		f.write('version 1.4.5, June 2021\n')
 		f.write('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ\n')
 		f.write('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de\n')
 		f.write('--------------------------------------------------------------------\n')
