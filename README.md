@@ -10,7 +10,7 @@ Full description of used methods will be reported in the form of an open-access 
 
 **Linux**
 
-- Install _Python_ > 3.7 and _gfortran_
+- Install _Python_ >= 3.7 and _gfortran_
 - Install NumPy
 - then download _anaklasis_ and install thought the terminal
 
@@ -20,7 +20,7 @@ python3 setup.py install --user
 
 **macOS**
 
-- Install _python_ > 3.7 from [python.org](https://www.python.org/downloads/)
+- Install _python_ >= 3.7 from [python.org](https://www.python.org/downloads/)
 - Install _gfortran_ compiler. An easy way is to use the installers provided by _fxcoudert_ at [github](https://github.com/fxcoudert/gfortran-for-macOS)
 - Install NumPy  
 
@@ -58,7 +58,7 @@ In case you prefer *Anaconda* on *Windows* just make sure you have _setuptools_ 
 
 **Windows (with _gfortran_ installation)**
 
-- Install _python_ > 3.7 from [python.org](https://www.python.org/downloads/) and do not forget to include _python_ in the systen path.
+- Install _python_ >= 3.7 from [python.org](https://www.python.org/downloads/) and do not forget to include _python_ in the systen path.
 - Install NumPy and upgrade setuptools
 ```bash
 py -m pip install --upgrade pip setuptools
