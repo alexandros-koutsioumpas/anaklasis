@@ -51,7 +51,7 @@ py -m pip install numpy
 then navigate in the `\win_wheel` folder and install through the command prompt
 
 ```bash
-py -m pip install anaklasis-1.3-cp39-cp39m-win_amd64.whl
+py -m pip install anaklasis-1.4.5-cp39-cp39m-win_amd64.whl
 ```
 
 In case you prefer *Anaconda* on *Windows* just make sure you have _setuptools_ and _NumPy_ on the system and just install the wheel.
