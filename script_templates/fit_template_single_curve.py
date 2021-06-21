@@ -4,7 +4,7 @@ from anaklasis import ref
 
 project='my_project' #Here put the name of your project
 
-input_file = 'my_data.dat' # enter the filename of input data
+input_file = ['my_data.dat'] # enter the filename of input data
 units = ['A'] # set units of the input file, Angstrom (A) or nanometers (nm)
 
 # Define the model. Note that layer elements may be numerical
@@ -55,7 +55,7 @@ method = 'simple' # May be simple, mcmc or bootstrap
 
 # Note that we set experror to True or False depending on the
 # presence of a 3rd column in the input file containing dQ errors
-res = ref.fit(project, in_file, units, fit_mode,
+res = ref.fit(project, input_file, units, fit_mode,
 fit_weight,method,resolution,patches, system,
 global_param,multi_param, constraints,
 background,scale,experror=True, plot=True,fast=True)
