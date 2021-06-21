@@ -55,7 +55,7 @@ method = 'simple' # May be simple, mcmc or bootstrap
 
 # Note that we set experror to True or False depending on the
 # presence of a 3rd column in the input file containing dQ errors
-res = anaklasis.fit(project, in_file, units, fit_mode,
+res = ref.fit(project, in_file, units, fit_mode,
 fit_weight,method,resolution,patches, system,
 global_param,multi_param, constraints,
 background,scale,experror=True, plot=True,fast=True)
