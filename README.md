@@ -106,6 +106,10 @@ that will open a html version of the API in your browser.
 
 A video tutorial is also on the way..
 
+## Templates
+
+In the directory `/script_templates` you may find commented scripts that may guide you for writing _anaklasis_ analysis scripts.
+
 ## Post-installation tests
 
 In the folder `/tests` you will find a _Python_ script `tests.py` that runs tests of the core calculations used by all three _anaklasis_ functions and reports if the results are the same as those obtained by version 1.3 of the package. You may run the tests using
