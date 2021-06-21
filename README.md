@@ -104,7 +104,7 @@ pdoc anaklasis
 
 that will open a html version of the API in your browser.
 
-A video tutorial is also on the way..
+In this [YouTune link](https://www.youtube.com/watch?v=ieulImJUK5o) you may also find a video tutorial for fitting the [ORSO example data](https://github.com/reflectivity/reflectivity.github.io/blob/master/workshops/workshop_2021/ORSO_example.ort) with _anaklasis_.
 
 ## Templates
 
