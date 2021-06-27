@@ -218,13 +218,13 @@ def Reflectivity(q_bin,res_bin, LayerMatrix, resolution,bkg,scale,patches,mp):
 	Refl=np.zeros([len(q_bin), 3])
 	Refl[:,0]=np.array(q_bin)
 
-	if mp == -1:
-		num_cores = multiprocessing.cpu_count() # all cores
-	else:
-		num_cores = 1 # single core
+	# if mp == -1:
+	# 	num_cores = multiprocessing.cpu_count() # all cores
+	# else:
+	# 	num_cores = 1 # single core
 		
-
-	#Refl[:,1]=np.array(Parallel(n_jobs=num_cores)(delayed(pointRef)(i,q_bin,res_bin, LayerMatrix, resolution,bkg,scale,patches) for i in range(len(q_bin))))
+	mp=1 # Further testing for multiprocessing needed
+	
 	if mp == -1:
 		pool = Pool(num_cores)
 		myargs=[]
@@ -1427,7 +1427,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 
 	print('--------------------------------------------------------------------')
 	print('Program ANAKLASIS - Fit Module for X-ray/Neutron reflection datasets')
-	print('version 1.4.5, June 2021')
+	print('version 1.4.6, June 2021')
 	print('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ')
 	print('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de')
 	print('--------------------------------------------------------------------')
@@ -3166,7 +3166,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 		f = open(project+"_final_parameters.log", "w")
 		f.write('--------------------------------------------------------------------\n')
 		f.write('Program ANAKLASIS - Fit Module for X-ray/Neutron reflection datasets\n')
-		f.write('version 1.4.5, June 2021\n')
+		f.write('version 1.4.6, June 2021\n')
 		f.write('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ\n')
 		f.write('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de\n')
 		f.write('--------------------------------------------------------------------\n')
@@ -3954,7 +3954,7 @@ def calculate(project,resolution, patches, system, system_param, background, sca
 
 	print('--------------------------------------------------------------------')
 	print('Program ANAKLASIS - Calculation Module for X-ray/Neutron reflection ')
-	print('version 1.4.5, June 2021')
+	print('version 1.4.6, June 2021')
 	print('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ')
 	print('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de')
 	print('--------------------------------------------------------------------')
@@ -4049,7 +4049,7 @@ def calculate(project,resolution, patches, system, system_param, background, sca
 		f = open(project+"_calculation_parameters.log", "w")
 		f.write('--------------------------------------------------------------------\n')
 		f.write('Program ANAKLASIS - Calculation Module for X-ray/Neutron reflection \n')
-		f.write('version 1.4.5, June 2021\n')
+		f.write('version 1.4.6, June 2021\n')
 		f.write('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ\n')
 		f.write('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de\n')
 		f.write('--------------------------------------------------------------------\n')
@@ -4583,7 +4583,7 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 
 	print('--------------------------------------------------------------------')
 	print('Program ANAKLASIS - Comparison Module for X-ray/Neutron reflection ')
-	print('version 1.4.5, June 2021')
+	print('version 1.4.6, June 2021')
 	print('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ')
 	print('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de')
 	print('--------------------------------------------------------------------')
@@ -4740,7 +4740,7 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 		f = open(project+"_comparison_parameters.log", "w")
 		f.write('--------------------------------------------------------------------\n')
 		f.write('Program ANAKLASIS - Comparison Module for X-ray/Neutron reflection \n')
-		f.write('version 1.4.5, June 2021\n')
+		f.write('version 1.4.6, June 2021\n')
 		f.write('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ\n')
 		f.write('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de\n')
 		f.write('--------------------------------------------------------------------\n')
