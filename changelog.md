@@ -1,7 +1,15 @@
 # anaklasis changelog
 
 
+## Version 1.4.6 (June 2021)
+
+- inclusion of script templates for common data-refinement workflows
+- added example (ORSO data)
+- multiprocessing changes
+- Calculation tests performed and passed for this release!
+
 ## Version 1.4.5 (June 2021)
+
 - minor code changes
 - minor multiprocessing changes
 - Calculation tests performed and passed for this release! 
