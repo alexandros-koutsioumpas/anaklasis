@@ -24,7 +24,7 @@ system=[model]
 patches=[1.0]
 
 global_param = [
-    # param  min  max  description
+    # param  min  max  description   type
     ['p0', 0, 20, 'air/SiOx_roughness','uniform'],
     ['p1', 3.3e-6, 3.7e-6, 'SiOx_sld','uniform'],
     ['p2', 0, 2000, 'SiOx_thickness','uniform'],
