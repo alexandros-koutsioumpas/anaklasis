@@ -212,9 +212,19 @@ def pointRef(i,q_bin,res_bin, LayerMatrix, resolution,bkg,scale,patches):
 
 def Reflectivity(q_bin,res_bin, LayerMatrix, resolution,bkg,scale,patches,mp):
 	"""Internal anaklasis fuction"""
-	# Given a Q bin 1-d array, layer model (LayerMatrix) and instrumental resolution  calculate the specular reflectivity
-	# and return an array with Q, R(Q), R(Q)Q^4 
-	# with mp=-1 all cores are used, with mp=1 only one core
+	# Given a q_bin (Q points) 1-d array, layer model (LayerMatrix), instrumental resolution, background, scale and number of patches
+	# calculate the specular reflectivity and return a NumPy array with Q, R(Q), R(Q)Q^4 
+	# Notes:
+	# - LayerMatrix is a list that has the same form as the 'model' list with the exception
+	#   that all elements except 'description' (last column) have to be numeric (not SymPy expressions).
+	# - bkg,scale,patches are floats.
+	# - In case of pointwise smearing: resolution = -1 and res_bin array should contain the point by point dQ (FWHM)
+	# - In case of constant smearing, resolution and all res_bin elements should be equal to dQ/Q (FWHM). res_bin should have the same
+	# size as q_bin 
+	# with mp=-1 all cores are used, with mp=1 only one core (not used for the moment)
+	#
+	# In future version a user friendly function for point by point Reflectivity calculations will be provided
+	# that will not be meant to be used only internally by the package.
 	Refl=np.zeros([len(q_bin), 3])
 	Refl[:,0]=np.array(q_bin)
 
@@ -1017,7 +1027,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 	resolution = [res0, res1, ... , resM-1]
 	```	
 
-	Each element is the dQ/Q resolution of the corresponding input data
+	Each element is the dQ/Q resolution (FWHM) of the corresponding input data
 	
 	for example `res1` describes the resolution of the data present in 
 	`'file1'`.
@@ -1427,7 +1437,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 
 	print('--------------------------------------------------------------------')
 	print('Program ANAKLASIS - Fit Module for X-ray/Neutron reflection datasets')
-	print('version 1.4.6, June 2021')
+	print('version 1.5.0, August 2021')
 	print('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ')
 	print('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de')
 	print('--------------------------------------------------------------------')
@@ -3166,7 +3176,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 		f = open(project+"_final_parameters.log", "w")
 		f.write('--------------------------------------------------------------------\n')
 		f.write('Program ANAKLASIS - Fit Module for X-ray/Neutron reflection datasets\n')
-		f.write('version 1.4.6, June 2021\n')
+		f.write('version 1.5.0, August 2021\n')
 		f.write('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ\n')
 		f.write('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de\n')
 		f.write('--------------------------------------------------------------------\n')
@@ -3737,7 +3747,7 @@ def calculate(project,resolution, patches, system, system_param, background, sca
 	corresponding PDF figures are saved together with the ASCII data files.
 
 	*resolution* : list of single float element corresponding to the dQ/Q 
-	resolution
+	resolution (FWHM)
 
 	```python
 	resolution = [res_value]
@@ -3954,7 +3964,7 @@ def calculate(project,resolution, patches, system, system_param, background, sca
 
 	print('--------------------------------------------------------------------')
 	print('Program ANAKLASIS - Calculation Module for X-ray/Neutron reflection ')
-	print('version 1.4.6, June 2021')
+	print('version 1.5.0, August 2021')
 	print('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ')
 	print('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de')
 	print('--------------------------------------------------------------------')
@@ -4049,7 +4059,7 @@ def calculate(project,resolution, patches, system, system_param, background, sca
 		f = open(project+"_calculation_parameters.log", "w")
 		f.write('--------------------------------------------------------------------\n')
 		f.write('Program ANAKLASIS - Calculation Module for X-ray/Neutron reflection \n')
-		f.write('version 1.4.6, June 2021\n')
+		f.write('version 1.5.0, August 2021\n')
 		f.write('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ\n')
 		f.write('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de\n')
 		f.write('--------------------------------------------------------------------\n')
@@ -4331,7 +4341,7 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 	describing the units of momentum transfer (Q) in the input file.  
 
 	*resolution* : list of single float element corresponding to the dQ/Q 
-	resolution of the input data
+	resolution (FWHM) of the input data
 
 	```python
 	resolution = [res_value]
@@ -4583,7 +4593,7 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 
 	print('--------------------------------------------------------------------')
 	print('Program ANAKLASIS - Comparison Module for X-ray/Neutron reflection ')
-	print('version 1.4.6, June 2021')
+	print('version 1.5.0, August 2021')
 	print('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ')
 	print('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de')
 	print('--------------------------------------------------------------------')
@@ -4740,7 +4750,7 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 		f = open(project+"_comparison_parameters.log", "w")
 		f.write('--------------------------------------------------------------------\n')
 		f.write('Program ANAKLASIS - Comparison Module for X-ray/Neutron reflection \n')
-		f.write('version 1.4.6, June 2021\n')
+		f.write('version 1.5.0, August 2021\n')
 		f.write('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ\n')
 		f.write('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de\n')
 		f.write('--------------------------------------------------------------------\n')

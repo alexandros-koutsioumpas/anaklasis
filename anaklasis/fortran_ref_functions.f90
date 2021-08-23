@@ -1,7 +1,7 @@
 !************************************************************************************
 SUBROUTINE f_RealRef(mode,q,res,Nlayers,LayerMatrix,fRealRef)    ! Incorporation of Instrumental Resolution in the Reflectivity Calculation
 IMPLICIT NONE
-integer, intent(in) :: mode	                   ! 0 = normal, 1 = slow
+integer, intent(in) :: mode	                   ! 0 = default (17 points integration), 1 = integration with 2*mode+1 points
 real(8), intent(in) :: q                       ! neutron wavelength (A)
 real(8), intent(in) :: res                     ! instrumental resolution dq/q
 integer, intent(in) :: Nlayers                 ! Number of layers in the model
@@ -19,23 +19,13 @@ REAL*8 pi
 REAL*8 deltaq
 COMPLEX*16 ii
 COMPLEX(8), dimension(0:Nlayers) :: l1,l2
-REAL*8 deltaq2,gfact
-real(8), dimension(0:8) :: gfactor
-
-gfactor(0)=0.19741265136584743
-gfactor(1)=0.17466632194020804
-gfactor(2)=0.12097757871001297
-gfactor(3)=0.06559061680303818
-gfactor(4)=0.027834684208772387
-gfactor(6)=0.009244709419990171
-gfactor(7)=0.002402738192663789
-gfactor(8)=0.0004886077571899516
+REAL*8 deltaq2,gfact,dx
 
 pi=3.141592653589793238D0
 ii=(0.0D0,1.0D0)
 
 fRealRef=0.0D0
-deltaq=q*res/2.0D0 ! the width of the Gaussian should be equal to 2*DeltaQ
+deltaq=q*res/2.354820D0 ! FWHM
 
 ! Layer Matric calcs
 do j=0,Nlayers
@@ -63,24 +53,28 @@ enddo
 
 
 ! Gaussian convolution
+! from -4*sigma to 4*sigma, 17 point evaluation
 if(deltaq.EQ.0.0D0) then
     qq=q
     fRealRef=fRealRef+Reflectivity()
 else
-    if(mode.EQ.0) then
-    	!gfact=(1.0D0/(deltaq*sqrt(2.0D0*pi)))
-    	deltaq2=2.0D0*deltaq**2
-        do i=-8,8
-            qq=q+dble(i)*deltaq/2.0D0
-            !gweight=gfact*exp(-((qq-q)**2)/(deltaq2))*(deltaq/2.0D0)
-            fRealRef=fRealRef+gfactor(abs(i))*Reflectivity()
-        enddo
-    else
+    if(mode.EQ.0) then ! integration with midpoint rule, 17 point evaluation
     	gfact=(1.0D0/(deltaq*sqrt(2.0D0*pi)))
-    	deltaq2=2.0D0*deltaq**2
-        do i=-27,27
-            qq=q+dble(i)*deltaq/9.0D0
-            gweight=gfact*exp(-((qq-q)**2)/(deltaq2))*(deltaq/9.0D0)
+    	deltaq2=2.0D0*(deltaq**2)
+        do i=-8,8
+        	dx=8.0D0*deltaq/17.0D0
+            qq=q+dble(i)*dx
+            gweight=gfact*dexp(-((qq-q)**2)/(deltaq2))*dx
+            fRealRef=fRealRef+gweight*Reflectivity()
+        enddo
+					
+    else ! integration with midpoint rule, 2*mode+1 points evaluation
+    	gfact=(1.0D0/(deltaq*sqrt(2.0D0*pi)))
+    	deltaq2=2.0D0*(deltaq**2)
+        do i=-mode,mode
+        	dx=8.0D0*deltaq/dble(2*mode+1)
+            qq=q+dble(i)*dx
+            gweight=gfact*dexp(-((qq-q)**2)/(deltaq2))*dx
             fRealRef=fRealRef+gweight*Reflectivity()
         enddo
     endif
