@@ -10,7 +10,7 @@ ext = [Extension(name='fortran_ref',
 
 setup(
 	name='anaklasis',
-	version='1.4.6',
+	version='1.5.0',
 	author='Alexandros Koutsioumpas',
 	author_email='a.koutsioumpas@fz-juelich.de',
 	description='Neutron and X-ray reflectivity calculations',

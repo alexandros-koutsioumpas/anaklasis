@@ -1,6 +1,12 @@
 # anaklasis changelog
 
 
+## Version 1.5 (August 2021)
+
+- correction of a bug in the resolution convolution
+- update of the test script
+
+
 ## Version 1.4.6 (June 2021)
 
 - inclusion of script templates for common data-refinement workflows
