@@ -217,7 +217,7 @@ def Reflectivity(q_bin,res_bin, LayerMatrix, resolution,bkg,scale,patches,mp):
 	# Notes:
 	# - LayerMatrix is a list that has the same form as the 'model' list with the exception
 	#   that all elements except 'description' (last column) have to be numeric (not SymPy expressions).
-	# - bkg,scale,patches are floats.
+	# - bkg and scale are floats and patches is a list (as for fit,calculate and compare functions)..
 	# - In case of pointwise smearing: resolution = -1 and res_bin array should contain the point by point dQ (FWHM)
 	# - In case of constant smearing, resolution and all res_bin elements should be equal to dQ/Q (FWHM). res_bin should have the same
 	# size as q_bin 
