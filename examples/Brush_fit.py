@@ -47,7 +47,7 @@ global_param = [
 
 multi_param = [] # no multi-parameters
 constraints = [] # no constraints
-resolution=[0.06] # dQ/Q=6%
+resolution=[0.07] # dQ/Q=7%
 background = [[0.0,0.0,'uniform']] #background corrected data
 scale = [[1.0,1.0,'uniform']] #data correctly scaled
 
