@@ -2,15 +2,15 @@
 SUBROUTINE f_RealRef(mode,q,res,Nlayers,LayerMatrix,fRealRef)    ! Incorporation of Instrumental Resolution in the Reflectivity Calculation
 IMPLICIT NONE
 integer, intent(in) :: mode	                   ! 0 = default (17 points integration), 1 = integration with 2*mode+1 points
-real(8), intent(in) :: q                       ! neutron wavelength (A)
-real(8), intent(in) :: res                     ! instrumental resolution dq/q
+real*8, intent(in) :: q                       ! neutron wavelength (A)
+real*8, intent(in) :: res                     ! instrumental resolution dq/q
 integer, intent(in) :: Nlayers                 ! Number of layers in the model
-real(8), dimension(0:Nlayers+1,0:4), intent(in) :: LayerMatrix
+real*8, dimension(0:Nlayers+1,0:4), intent(in) :: LayerMatrix
                                                ! Matrix containing the real (1st column) and imaginary (2nd column) scattering
                                                ! length density of each layer. The 3rd column corresponds to the thickness (A) of
                                                ! each layer and the 4th column to the roughness (A).
                                                ! row 1 and Nlayers+1 concern the fronting and backing material respectively
-real(8), intent(out) :: fRealRef
+real*8, intent(out) :: fRealRef
 !---------------------------------------------------------------------
 INTEGER i,j                                    ! counter
 REAL*8 qq                                      ! wavevector of points around q, = q[1+(a/n)(dq/q)], where dq/q is the resolution
@@ -18,7 +18,7 @@ REAL*8 gweight                                 ! Gaussian weight = exp[-2(a/n)^2
 REAL*8 pi
 REAL*8 deltaq
 COMPLEX*16 ii
-COMPLEX(8), dimension(0:Nlayers) :: l1,l2
+COMPLEX*16, dimension(0:Nlayers+1) :: l1
 REAL*8 deltaq2,gfact,dx
 
 pi=3.141592653589793238D0
@@ -27,27 +27,22 @@ ii=(0.0D0,1.0D0)
 fRealRef=0.0D0
 deltaq=q*res/2.354820D0 ! FWHM
 
+
 ! Layer Matric calcs
-do j=0,Nlayers
+! Force the correct branch cut for sqrt below the critical edge by addition of a tiny number
+do j=0,Nlayers+1
 	if(LayerMatrix(Nlayers+1,4).EQ.1.0D0.AND.LayerMatrix(0,4).EQ.0.0D0) then
     	l1(j)=(LayerMatrix(j,0)*(1.0D0-LayerMatrix(j,4))+LayerMatrix(Nlayers+1,0)*LayerMatrix(j,4))+ii*(LayerMatrix(j,1)*&
-        (1.0D0-LayerMatrix(j,4))+LayerMatrix(Nlayers+1,1)*LayerMatrix(j,4))-LayerMatrix(0,0)-ii*LayerMatrix(0,1)
-        l2(j)=(LayerMatrix(j+1,0)*(1.0D0-LayerMatrix(j+1,4))+LayerMatrix(Nlayers+1,0)*LayerMatrix(j+1,4))+ii*(LayerMatrix(j+1,1)&
-        *(1.0D0-LayerMatrix(j+1,4))+LayerMatrix(Nlayers+1,1)*LayerMatrix(j+1,4))-LayerMatrix(0,0)-ii*LayerMatrix(0,1)
+        (1.0D0-LayerMatrix(j,4))+LayerMatrix(Nlayers+1,1)*LayerMatrix(j,4))-LayerMatrix(0,0)+ii*1e-30
     endif
         
     if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.1.0D0) then
     	l1(j)=(LayerMatrix(j,0)*(1.0D0-LayerMatrix(j,4))+LayerMatrix(0,0)*LayerMatrix(j,4))+ii*(LayerMatrix(j,1)*&
-        (1.0D0-LayerMatrix(j,4))+LayerMatrix(0,1)*LayerMatrix(j,4))-LayerMatrix(0,0)-ii*LayerMatrix(0,1)
-        l2(j)=(LayerMatrix(j+1,0)*(1.0D0-LayerMatrix(j+1,4))+LayerMatrix(0,0)*LayerMatrix(j+1,4))+ii*(LayerMatrix(j+1,1)&
-        *(1.0D0-LayerMatrix(j+1,4))+LayerMatrix(0,1)*LayerMatrix(j+1,4))-LayerMatrix(0,0)-ii*LayerMatrix(0,1)
+        (1.0D0-LayerMatrix(j,4))+LayerMatrix(0,1)*LayerMatrix(j,4))-LayerMatrix(0,0)+ii*1e-30
     endif
         
     if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.0.0) then
-    	l1(j)=(LayerMatrix(j,0)*(1.0D0-LayerMatrix(j,4)))+ii*(LayerMatrix(j,1)*&
-        (1.0D0-LayerMatrix(j,4)))-LayerMatrix(0,0)-ii*LayerMatrix(0,1)
-        l2(j)=(LayerMatrix(j+1,0)*(1.0D0-LayerMatrix(j+1,4)))+ii*(LayerMatrix(j+1,1)&
-        *(1.0D0-LayerMatrix(j+1,4)))-LayerMatrix(0,0)-ii*LayerMatrix(0,1)
+    	l1(j)=LayerMatrix(j,0)+ii*LayerMatrix(j,1)-LayerMatrix(0,0)+ii*1e-30
     endif
 enddo
 
@@ -82,13 +77,14 @@ endif
 
 contains
     !************************************************************************************
-    real(8) FUNCTION Reflectivity()   ! Calculation of Reflectivity based on the Matrix Method
+    real*8 FUNCTION Reflectivity()   ! Calculation of Reflectivity based on the Matrix Method
     !IMPLICIT NONE
     COMPLEX*16 kz
-    COMPLEX*16 k1,k2  ! k_{n},k_{n+1}                              
+    !COMPLEX*16 k1,k2  ! k_{n},k_{n+1}    
+	COMPLEX*16, dimension(0:Nlayers+1) :: k
     COMPLEX*16 b
 
-    COMPLEX*16 r
+    COMPLEX*8 r
     REAL*8 d
     COMPLEX*16 m11,m12,m21,m22
     COMPLEX*16 k11,k12,k21,k22
@@ -111,8 +107,9 @@ contains
 
 
     !ii=(0.0D0,1.0D0)
-    kz=CMPLX(qq/2.0D0,0.0D0)
-	kz2=kz**2
+    !kz=CMPLX(qq/2.0D0,0.0D0)
+    !kz=qq/2.0D0
+	!kz2=kz**2
 
 
     m11=(1.0D0,0.0D0)
@@ -120,24 +117,25 @@ contains
     m21=(0.0D0,0.0D0)
     m22=(1.0D0,0.0D0)
 
+	do j=0,Nlayers+1
+		k(j)=sqrt((qq**2)/4.0D0-4.0D0*pi*l1(j))
+	enddo
+
     do j=0,Nlayers
 		
-        k1=cdsqrt(kz2-4.0D0*pi*l1(j))
-        k2=cdsqrt(kz2-4.0D0*pi*l2(j))
-
-        r=((k1-k2)/(k1+k2))*cdexp(-2.0D0*k1*k2*LayerMatrix(j,3)**2)
+        r=((k(j)-k(j+1))/(k(j)+k(j+1)))*exp(-2.0D0*k(j)*k(j+1)*LayerMatrix(j,3)**2)
 
         d=LayerMatrix(j,2)
 
         if(j.EQ.0) then
             b=0.0D0
         else
-            b=k1*d
+            b=k(j)*d
       	endif
 
 		iixb=ii*b
-		cdexpiixb=cdexp(iixb)
-		cdexpmiixb=cdexp(-iixb)
+		cdexpiixb=exp(iixb)
+		cdexpmiixb=1.0D0/cdexpiixb !exp(-iixb)
 		
         k11=cdexpiixb
         k12=r*cdexpiixb
@@ -156,7 +154,7 @@ contains
 
     enddo
 
-    Reflectivity=REAL((m21*DCONJG(m21))/(m11*DCONJG(m11)))
+    Reflectivity=REAL((m21*CONJG(m21))/(m11*CONJG(m11)))
     END FUNCTION
     !************************************************************************************
 END SUBROUTINE
@@ -170,17 +168,17 @@ SUBROUTINE f_profilecalc(z, LayerMatrix, Nlayers,fProfile)
 ! row 1 and Nlayers+1 concern the fronting and backing material respectively
 ! Nlayers, Number of layers in the model
 IMPLICIT NONE
-real(8), intent(in) :: z                       ! distance from the surface along the z axis
-real(8), dimension(0:Nlayers+1,0:4), intent(in) :: LayerMatrix
+real*8, intent(in) :: z                       ! distance from the surface along the z axis
+real*8, dimension(0:Nlayers+1,0:4), intent(in) :: LayerMatrix
                                                ! Matrix containing the real (1st column) and imaginary (2nd column) scattering
                                                ! length density of each layer. The 3rd column corresponds to the thickness (A) of
                                                ! each layer and the 4th column to the roughness (A).
                                                ! row 1 and Nlayers+1 concern the fronting and backing 
 integer, intent(in) :: Nlayers                 ! Number of layers in the model
-real(8), intent(out) :: fProfile
+real*8, intent(out) :: fProfile
 !---------------------------------------------------------------------
 INTEGER i,j                                    ! counter
-real(8) zi,lmi1,lmi2,rho
+real*8 zi,lmi1,lmi2,rho
 
 rho=LayerMatrix(0,0)
 do i=2,Nlayers+2
@@ -226,16 +224,16 @@ SUBROUTINE f_solventcalc(z, LayerMatrix, Nlayers,fsolvent)
 ! row 1 and Nlayers+1 concern the fronting and backing material respectively
 ! Nlayers, Number of layers in the model
 IMPLICIT NONE
-real(8), intent(in) :: z                       ! distance from the surface along the z axis
-real(8), dimension(0:Nlayers+1,0:4), intent(in) :: LayerMatrix
+real*8, intent(in) :: z                       ! distance from the surface along the z axis
+real*8, dimension(0:Nlayers+1,0:4), intent(in) :: LayerMatrix
                                                ! Matrix containing the real (1st column) and imaginary (2nd column) scattering
                                                ! length density of each layer. The 3rd column corresponds to the thickness (A) of
                                                ! each layer and the 4th column to the roughness (A).
                                                ! row 1 and Nlayers+1 concern the fronting and backing 
 integer, intent(in) :: Nlayers                 ! Number of layers in the model
-real(8), intent(out) :: fsolvent
+real*8, intent(out) :: fsolvent
 !---------------------------------------------------------------------
-real(8) rho,zi,lmi1,lmi2
+real*8 rho,zi,lmi1,lmi2
 integer i,j
 
 
