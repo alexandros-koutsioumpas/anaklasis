@@ -1,6 +1,11 @@
 # anaklasis changelog
 
 
+## Version 1.5.2 (August 2021)
+
+- change of resolution convolution limits
+- update of the test script
+
 ## Version 1.5.1 (August 2021)
 
 - enforcement of correct branch cut for complex sqrt calculations
