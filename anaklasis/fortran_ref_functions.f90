@@ -48,7 +48,7 @@ enddo
 
 
 ! Gaussian convolution
-! from -4*sigma to 4*sigma, 17 point evaluation
+! from -3.5*sigma to 3.5*sigma, 17 point evaluation
 if(deltaq.EQ.0.0D0) then
     qq=q
     fRealRef=fRealRef+Reflectivity()
@@ -57,7 +57,7 @@ else
     	gfact=(1.0D0/(deltaq*sqrt(2.0D0*pi)))
     	deltaq2=2.0D0*(deltaq**2)
         do i=-8,8
-        	dx=8.0D0*deltaq/17.0D0
+        	dx=7.0D0*deltaq/17.0D0
             qq=q+dble(i)*dx
             gweight=gfact*dexp(-((qq-q)**2)/(deltaq2))*dx
             fRealRef=fRealRef+gweight*Reflectivity()
@@ -67,7 +67,7 @@ else
     	gfact=(1.0D0/(deltaq*sqrt(2.0D0*pi)))
     	deltaq2=2.0D0*(deltaq**2)
         do i=-mode,mode
-        	dx=8.0D0*deltaq/dble(2*mode+1)
+        	dx=7.0D0*deltaq/dble(2*mode+1)
             qq=q+dble(i)*dx
             gweight=gfact*dexp(-((qq-q)**2)/(deltaq2))*dx
             fRealRef=fRealRef+gweight*Reflectivity()

@@ -1,5 +1,5 @@
 """
-Package *anaklasis* version 1.5.1, August 2021
+Package *anaklasis* version 1.5.2, August 2021
 
 developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ
 
