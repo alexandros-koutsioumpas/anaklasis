@@ -39,7 +39,7 @@ qmax = [0.25] # Here set the maximum Q value
 
 # Note that we set experror to True or False depending on the
 # presence of a 3rd column in the input file containting dQ errors
-res = anaklasis.compare(project, input_file, units, resolution, 
+res = ref.compare(project, input_file, units, resolution, 
 	patches, system, global_param,background, scale, qmax, 
 	experror=True, plot=True)
 
