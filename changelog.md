@@ -1,6 +1,13 @@
 # anaklasis changelog
 
 
+## Version 1.5.1 (August 2021)
+
+- enforcement of correct branch cut for complex sqrt calculations
+- correction of a numerical roundoff error related bug
+- update of the test script
+- slightly faster reflectivity calculation engine
+
 ## Version 1.5 (August 2021)
 
 - correction of a bug in the resolution convolution
