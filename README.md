@@ -1,6 +1,6 @@
 # anaklasis 
 
-[_anaklasis_](https://github.com/alexandros-koutsioumpas/anaklasis) is a set of open-source _Python3_ scripts (with _fortran90_ extensions) that facilitate a range of specular neutron and x-ray reflectivity calculations, involving the generation of theoretical curves and the comparison/fit of interfacial model reflectivity against experimental datasets.  The _ref_ module, contains three callable functions, _ref.calculate_ for generating theoretical reflectivity curves, _ref.compare_ for comparison of experimental data with theoretical curves and _ref.fit_ for refinement of experimental data against a defined model. Execution takes place by defining the interfacial model and instrumental parameters as lists in a simple _Python_ script and by passing them as arguments to the desired function.
+[_anaklasis_](https://github.com/alexandros-koutsioumpas/anaklasis) is a set of open-source _Python3_ scripts (with _FORTRAN 90_ extensions) that facilitate a range of specular neutron and x-ray reflectivity calculations, involving the generation of theoretical curves and the comparison/fit of interfacial model reflectivity against experimental datasets.  The _ref_ module, contains three callable functions, _ref.calculate_ for generating theoretical reflectivity curves, _ref.compare_ for comparison of experimental data with theoretical curves and _ref.fit_ for refinement of experimental data against a defined model. Execution takes place by defining the interfacial model and instrumental parameters as lists in a simple _Python_ script and by passing them as arguments to the desired function.
 
 In the examples folder many scripts with calculations and refinements performed by the program can be found. Addiitonaly some _Jupyter notebooks_ explaining the input and output are included.
 
@@ -8,40 +8,71 @@ Full description of used methods will be reported in the form of an open-access 
 
 ## Installation
 
+It is adviced to install a _FORTRAN_ compiler on your system before proceeding with installation, so that the _FORTRAN_ extensions for reflectivity calculations can be compiled. If you perform the installation without a _FORTRAN_ compiler, a _Python_ calculation engine will be used by the package. The engine can be considerably accelerated by installing the [_Numba_ package](https://numba.readthedocs.io/en/stable/user/installing.html) after installing _anaklasis_.
+
+Note that calculations with _Numba_ are 30-40% slower than with the _FORTRAN_ extensions, while _Python_ calculation engine without _Numba_ installed can be more than 20-30 times slower than the _FORTRAN_ extensions.
+
 **Linux**
 
-- Install _Python_ >= 3.7 and _gfortran_
-- Install NumPy
-- then download _anaklasis_ and install thought the terminal
+- Install _Python_ >= 3.7 and optionally _gfortran_ 
+- Install _NumPy_
+- then download the latest _anaklasis_ release, unzip the archive and install throught the terminal
 
 ```bash
 python3 setup.py install --user
 ```
 
+- If _gfortran_ was not present, install _Numba_ package.
+
 **macOS**
 
 - Install _python_ >= 3.7 from [python.org](https://www.python.org/downloads/)
-- Install _gfortran_ compiler. An easy way is to use the installers provided by _fxcoudert_ at [github](https://github.com/fxcoudert/gfortran-for-macOS)
-- Install NumPy  
+- Optionally install _gfortran_ compiler. An easy way is to use the installers provided by _fxcoudert_ at [github](https://github.com/fxcoudert/gfortran-for-macOS)
+- Install _NumPy_  
 
 ```bash
 python3 -m pip install numpy
 ```
 
-- then download _anaklasis_, navigate to the proper folder  and install thought the terminal
+- then download _anaklasis_, navigate to the proper folder  and install throught the terminal
 
 ```bash
 python3 setup.py install
 ```
 
+- If _gfortran_ was not present, install _Numba_ package.
+
+```bash
+python3 -m pip install numba
+```
+
 Note that if you prefer you may use [MacPorts](https://www.macports.org) or [Homebrew](https://brew.sh) for the installation of _gfortran_ compiler.
 
-**Windows 10 (without installing _gfortran_ )**
+**Windows 10 (_Numba_)**
 
-For convenience a _wheel_ with a pre-compiled _fortran_ extension is provided (folder `\win_wheel`) for _Python_ version 3.9 (more _Python_ versions to come). For installing it follow the steps below:
+- Install _python_ >= 3.7 from [python.org](https://www.python.org/downloads/) and do not forget to include _python_ in the systen path.
+- Install _NumPy_ and upgrade _setuptools_
+```bash
+py -m pip install --upgrade pip setuptools
+
+py -m pip install numpy
+```
+- Download the latest _anaklasis_ release, navigate to the proper folder and install thought the command prompt
+
+```bash
+py setup.py install
+```
+- Install _Numba_
+```bash
+py -m pip install numba
+```
+
+**Windows 10 (_Python_ 3.9 only with provided _wheel_ )**
+
+For convenience a _wheel_ with a pre-compiled _fortran_ extension is provided (folder `\win_wheel`) for _Python_ version 3.9. For installing it follow the steps below:
 
 - Install _python_ 3.9 from [python.org](https://www.python.org/downloads/) and do not forget to include _python_ in the systen path.
-- Install NumPy and upgrade setuptools
+- Install _NumPy_ and upgrade _setuptools_
 ```bash
 py -m pip install --upgrade pip setuptools
 
@@ -51,7 +82,7 @@ py -m pip install numpy
 then navigate in the `\win_wheel` folder and install through the command prompt
 
 ```bash
-py -m pip install anaklasis-1.5.2-cp39-cp39m-win_amd64.whl
+py -m pip install anaklasis-1.6.0-cp39-cp39m-win_amd64.whl
 ```
 
 In case you prefer *Anaconda* on *Windows* just make sure you have _setuptools_ and _NumPy_ on the system and just install the wheel.
@@ -59,7 +90,7 @@ In case you prefer *Anaconda* on *Windows* just make sure you have _setuptools_ 
 **Windows (with _gfortran_ installation)**
 
 - Install _python_ >= 3.7 from [python.org](https://www.python.org/downloads/) and do not forget to include _python_ in the systen path.
-- Install NumPy and upgrade setuptools
+- Install _NumPy_ and upgrade _setuptools_
 ```bash
 py -m pip install --upgrade pip setuptools
 
@@ -112,13 +143,15 @@ In the directory `/script_templates` you may find commented scripts that may gui
 
 ## Post-installation tests
 
-In the folder `/tests` you will find a _Python_ script `tests.py` that runs tests of the core calculations used by all three _anaklasis_ functions and reports if the results are the same as those obtained by version 1.3 of the package. You may run the tests using
+In the folder `/tests` you will find a _Python_ script `tests.py` that runs tests of the core calculations used by all three _anaklasis_ functions and reports if the results are the same as those obtained by version 1.5.2 of the package. You may run the tests using
 
 ```bash
 python3 tests.py
 ```
 
 If the run is succesful you will receive a `All anaklasis tests passed!` message at the end.
+
+Also a script that runs only the [ORSO validation](https://github.com/andyfaff/orso/tree/master/reflectivity/test/unpolarised) tests `ORSO_tests.py` can be found in `/tests`.
 
 ## Note about running Bootstrap analysis
 

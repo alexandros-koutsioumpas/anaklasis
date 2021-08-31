@@ -1,5 +1,10 @@
 # anaklasis changelog
 
+## Version 1.6.0 (September 2021)
+
+- Introduction of additional _Python_ reflectivity calculation engine (accelarated with _Numba_), so that now a FORTRAN compiler is not necessary for installation of the package (although recommended). 
+- small update of the package documentation
+- Addition of ORSO validation tests in the test script.
 
 ## Version 1.5.2 (August 2021)
 
