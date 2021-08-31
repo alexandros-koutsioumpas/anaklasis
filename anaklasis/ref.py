@@ -66,6 +66,7 @@ with the package are a useful starting point for exploring interfacial
 system definition.
 """
 
+import math
 import os
 import numpy as np
 import corner
@@ -87,7 +88,24 @@ from scipy.optimize import minimize
 import scipy
 import warnings
 from scipy import special
-from fortran_ref import f_realref,f_profilecalc,f_solventcalc
+try:
+	from fortran_ref import f_realref,f_profilecalc,f_solventcalc
+	engine='fortran'
+	def njit(*args, **kwargs):
+	    def decorator(func):
+	        return func 
+	    return decorator
+except ImportError as e:
+	try:
+		from numba import njit
+		import numba
+		engine='numba'
+	except ImportError as e:
+		engine='python'
+		def njit(*args, **kwargs):
+		    def decorator(func):
+		        return func 
+		    return decorator
 # if os.name == 'nt':
 # 	spath=np.__file__
 # 	extra_dll_dir = os.path.join(spath[:-17], 'fortran_ref\.libs')
@@ -96,6 +114,117 @@ from fortran_ref import f_realref,f_profilecalc,f_solventcalc
 
 __all__ = ['fit', 'calculate','compare']
 
+#engine='python' # can be 'fortran', 'numba', 'python'
+
+@njit()
+def real_refl(mode,q,res,LayerMatrix, Nlayers):
+	#q neutron wavevector 1/Angstrom
+	#LayerMatrix, matrix containing the real (1st column) and imaginary (2nd column) scattering
+	# length density of each layer. The 3rd column corresponds to the thickness (A) of
+	# each layer and the 4th column to the roughness (A).
+	# row 1 and Nlayers+1 concern the fronting and backing material respectively
+	# Nlayers, Number of layers in the model
+	# res, instrumental resolution dq/q
+	#import numpy as np
+
+	# Function for calculating theoretical neutron reflectivity
+	def refl(qq, LayerMatrix, Nlayers, l1):
+		#q neutron wavevector 1/Angstrom
+		#LayerMatrix, matrix containing the real (1st column) and imaginary (2nd column) scattering
+		# length density of each layer. The 3rd column corresponds to the thickness (A) of
+		# each layer and the 4th column to the roughness (A). 5th column solvent penetration
+		# row 1 and Nlayers+1 concern the fronting and backing material respectively
+		# Nlayers, Number of layers in the model
+		"""
+											       !  theory: kn=sqrt[kz^2-4pi(rhon-rho0)]
+											       !          r_{n,n+1}=[(k_{n}-k_{n+1})/(k_{n}+k_{n+1})] exp(-2k_{n}k_{n+1}sigma_{n,n+1}^2)
+											       !          b_{0}=0, b_{n}=ik_{n}d_{n}
+											       !
+											       !				 		  |        exp(-bn)           r_{n,n+1} exp(-bn) |
+											       !          C_{n} = |  r_{n,n+1} exp(-bn)            exp (-bn)     |
+											       !
+											       !          M=C0 C1 C2 ... Cn,        R=|M10/M00|^2
+		"""
+		#import numpy as np
+
+		m11=1.0+0.0j
+		m12=0.0+0.0j
+		m21=0.0+0.0j
+		m22=1.0+0.0j
+
+		kz=np.zeros(Nlayers+2)*1j
+		kz[:]=np.sqrt((qq**2)/4.0-4.0*np.pi*l1[:])
+
+		for j in range(Nlayers+1):
+
+			r=((kz[j]-kz[j+1])/(kz[j]+kz[j+1]))*np.exp(-2.0*kz[j]*kz[j+1]*LayerMatrix[j,3]**2)
+
+			d=LayerMatrix[j,2]
+
+			if j==0:
+				b=0.0
+			else:
+				b=kz[j]*d
+
+			iixb=1j*b
+			cdexpiixb=np.exp(iixb)
+			cdexpmiixb=1.0/cdexpiixb #exp(-iixb)
+		
+			k11=cdexpiixb
+			k12=r*cdexpiixb
+			k21=r*cdexpmiixb
+			k22=cdexpmiixb
+
+			h11=m11 
+			h12=m12 
+			h21=m21 
+			h22=m22
+
+			m11=h11*k11+h12*k21 
+			m12=h11*k12+h12*k22 
+			m21=h21*k11+h22*k21 
+			m22=h21*k12+h22*k22
+
+		ref=np.real((m21*np.conj(m21))/(m11*np.conj(m11)))
+
+		return ref
+
+	real_ref=0.0
+	deltaq=q*res/2.354820 # FWHM
+
+
+	l1=np.zeros(Nlayers+2)*1j
+	for j in range(Nlayers+2):
+		if LayerMatrix[Nlayers+1,4] == 1.0 and LayerMatrix[0,4] == 0.0:
+			l1[j]=(LayerMatrix[j,0]*(1.0-LayerMatrix[j,4])+LayerMatrix[Nlayers+1,0]*LayerMatrix[j,4])+1j*(LayerMatrix[j,1]*(1.0-LayerMatrix[j,4])+LayerMatrix[Nlayers+1,1]*LayerMatrix[j,4])-LayerMatrix[0,0]+1j*1e-30
+
+		if LayerMatrix[Nlayers+1,4] == 0.0 and LayerMatrix[0,4] == 1.0:
+			l1[j]=(LayerMatrix[j,0]*(1.0-LayerMatrix[j,4])+LayerMatrix[0,0]*LayerMatrix[j,4])+1j*(LayerMatrix[j,1]*(1.0-LayerMatrix[j,4])+LayerMatrix[0,1]*LayerMatrix[j,4])-LayerMatrix[0,0]+1j*1e-30
+
+		if LayerMatrix[Nlayers+1,4] == 0.0 and LayerMatrix[0,4] == 0.0:
+			l1[j]=LayerMatrix[j,0]+1j*LayerMatrix[j,1]-LayerMatrix[0,0]+1j*1e-30
+
+	# Gaussian convolution
+	# from -3.5*sigma to 3.5*sigma, 17 point evaluation
+	if deltaq == 0.0:
+		qq=q
+		real_ref=refl(qq, LayerMatrix, Nlayers, l1)
+	else: # integration with midpoint rule, 17 point evaluation
+		gfact=(1.0/(deltaq*np.sqrt(2.0*np.pi)))
+		deltaq2=2.0*(deltaq**2)
+		for i in range(-8,9):
+			dx=7.0*deltaq/17.0
+			qq=q+i*dx
+			gweight=gfact*np.exp(-((qq-q)**2)/(deltaq2))*dx
+			real_ref=real_ref+gweight*refl(qq, LayerMatrix, Nlayers, l1)
+
+	return real_ref
+
+
+
+
+
+@njit()
 def calc_profile(z, LayerMatrix, Nlayers):
 	"""Internal anaklasis fuction"""
 	#z, distance from the surface along the z axis
@@ -107,25 +236,25 @@ def calc_profile(z, LayerMatrix, Nlayers):
 	#from scipy import special
 	#import numpy as np
 
-	rho=LayerMatrix[0][0]
+	rho=LayerMatrix[0,0]
 	for i in range(2,Nlayers+3):
 		zi=0
 		for j in range(1,i):
-			zi=zi+LayerMatrix[j-1][2]
+			zi=zi+LayerMatrix[j-1,2]
 
-		if LayerMatrix[Nlayers+1][4] == 1.0 and LayerMatrix[0][4] == 0.0:
-			lmi1=LayerMatrix[i-1][0]*(1.0-LayerMatrix[i-1][4])+LayerMatrix[Nlayers+1][0]*LayerMatrix[i-1][4]
-			lmi2=LayerMatrix[i-2][0]*(1.0-LayerMatrix[i-2][4])+LayerMatrix[Nlayers+1][0]*LayerMatrix[i-2][4]
-		if LayerMatrix[Nlayers+1][4] == 0.0 and LayerMatrix[0][4] == 1.0:
-			lmi1=LayerMatrix[i-1][0]*(1.0-LayerMatrix[i-1][4])+LayerMatrix[0][0]*LayerMatrix[i-1][4]
-			lmi2=LayerMatrix[i-2][0]*(1.0-LayerMatrix[i-2][4])+LayerMatrix[0][0]*LayerMatrix[i-2][4]
-		if LayerMatrix[Nlayers+1][4] == 0.0 and LayerMatrix[0][4] == 0.0:
-			lmi1=LayerMatrix[i-1][0]
-			lmi2=LayerMatrix[i-2][0]
+		if LayerMatrix[Nlayers+1,4] == 1.0 and LayerMatrix[0,4] == 0.0:
+			lmi1=LayerMatrix[i-1,0]*(1.0-LayerMatrix[i-1,4])+LayerMatrix[Nlayers+1,0]*LayerMatrix[i-1,4]
+			lmi2=LayerMatrix[i-2,0]*(1.0-LayerMatrix[i-2,4])+LayerMatrix[Nlayers+1,0]*LayerMatrix[i-2,4]
+		if LayerMatrix[Nlayers+1,4] == 0.0 and LayerMatrix[0,4] == 1.0:
+			lmi1=LayerMatrix[i-1,0]*(1.0-LayerMatrix[i-1,4])+LayerMatrix[0,0]*LayerMatrix[i-1,4]
+			lmi2=LayerMatrix[i-2,0]*(1.0-LayerMatrix[i-2,4])+LayerMatrix[0,0]*LayerMatrix[i-2,4]
+		if LayerMatrix[Nlayers+1,4] == 0.0 and LayerMatrix[0,4] == 0.0:
+			lmi1=LayerMatrix[i-1,0]
+			lmi2=LayerMatrix[i-2,0]
 
-		if LayerMatrix[i-2][3] != 0:
+		if LayerMatrix[i-2,3] != 0:
 			#rho=rho+((LayerMatrix[i-1][0]-LayerMatrix[i-2][0])/2.0)*(1.0+special.erf((z-zi)/(np.sqrt(2.0)*LayerMatrix[i-2][3])))
-			rho=rho+((lmi1-lmi2)/2.0)*(1.0+special.erf((z-zi)/(np.sqrt(2.0)*LayerMatrix[i-2][3])))
+			rho=rho+((lmi1-lmi2)/2.0)*(1.0+math.erf((z-zi)/(np.sqrt(2.0)*LayerMatrix[i-2,3])))
 
 		else:
 			if z >= zi:
@@ -136,6 +265,10 @@ def calc_profile(z, LayerMatrix, Nlayers):
 
 	return rho
 
+
+
+
+@njit()
 def calc_solvent_penetration(z, LayerMatrix, Nlayers):
 	"""Internal anaklasis fuction"""
 	#z, distance from the surface along the z axis
@@ -147,25 +280,25 @@ def calc_solvent_penetration(z, LayerMatrix, Nlayers):
 	#from scipy import special
 	#import numpy as np
 
-	if LayerMatrix[Nlayers+1][4] == 1.0 and LayerMatrix[0][4] == 0.0: rho=0.0
-	if LayerMatrix[Nlayers+1][4] == 0.0 and LayerMatrix[0][4] == 1.0: rho=1.0
-	if LayerMatrix[Nlayers+1][4] == 0.0 and LayerMatrix[0][4] == 0.0: return 0.0
+	if LayerMatrix[Nlayers+1,4] == 1.0 and LayerMatrix[0,4] == 0.0: rho=0.0
+	if LayerMatrix[Nlayers+1,4] == 0.0 and LayerMatrix[0,4] == 1.0: rho=1.0
+	if LayerMatrix[Nlayers+1,4] == 0.0 and LayerMatrix[0,4] == 0.0: return 0.0
 
 	for i in range(2,Nlayers+3):
 		zi=0
 		for j in range(1,i):
-			zi=zi+LayerMatrix[j-1][2]
+			zi=zi+LayerMatrix[j-1,2]
 
-		if LayerMatrix[Nlayers+1][4] == 1.0 and LayerMatrix[0][4] == 0.0:
-			lmi1=LayerMatrix[i-1][4]
-			lmi2=LayerMatrix[i-2][4]
-		if LayerMatrix[Nlayers+1][4] == 0.0 and LayerMatrix[0][4] == 1.0:
-			lmi1=LayerMatrix[i-1][4]
-			lmi2=LayerMatrix[i-2][4]
+		if LayerMatrix[Nlayers+1,4] == 1.0 and LayerMatrix[0,4] == 0.0:
+			lmi1=LayerMatrix[i-1,4]
+			lmi2=LayerMatrix[i-2,4]
+		if LayerMatrix[Nlayers+1,4] == 0.0 and LayerMatrix[0,4] == 1.0:
+			lmi1=LayerMatrix[i-1,4]
+			lmi2=LayerMatrix[i-2,4]
 
-		if LayerMatrix[i-2][3] != 0:
+		if LayerMatrix[i-2,3] != 0:
 			#rho=rho+((LayerMatrix[i-1][0]-LayerMatrix[i-2][0])/2.0)*(1.0+special.erf((z-zi)/(np.sqrt(2.0)*LayerMatrix[i-2][3])))
-			rho=rho+((lmi1-lmi2)/2.0)*(1.0+special.erf((z-zi)/(np.sqrt(2.0)*LayerMatrix[i-2][3])))
+			rho=rho+((lmi1-lmi2)/2.0)*(1.0+math.erf((z-zi)/(np.sqrt(2.0)*LayerMatrix[i-2,3])))
 
 		else:
 			if z > zi:
@@ -174,6 +307,9 @@ def calc_solvent_penetration(z, LayerMatrix, Nlayers):
 			else:
 				rho=rho+0.0	
 	return rho
+
+
+
 
 def profile(LayerMatrix, npoints):
 	"""Internal anaklasis fuction"""
@@ -195,8 +331,12 @@ def profile(LayerMatrix, npoints):
 		z_bin = np.linspace(-4*LayerMatrix[j][0][3]-5.0, global_total_d+4*LayerMatrix[j][len(LayerMatrix[j])-2][3]+5.0, npoints+1)
 		for i in range(len(z_bin)-1):
 			Profile[j][i][0]=z_bin[i]
-			#Profile[j][i][1]=calc_profile(z_bin[i],LayerMatrix[j], len(LayerMatrix[j])-2)
-			Profile[j][i][1]=f_profilecalc(z_bin[i],[a[0:5] for a in LayerMatrix[j]], len(LayerMatrix[j])-2)
+			if engine == 'fortran':
+				Profile[j][i][1]=f_profilecalc(z_bin[i],[a[0:5] for a in LayerMatrix[j]], len(LayerMatrix[j])-2)
+			elif engine == 'numba':
+				Profile[j][i][1]=calc_profile(z_bin[i],np.array([a[0:5] for a in LayerMatrix[j]]), len(LayerMatrix[j])-2)
+			else:
+				Profile[j][i][1]=calc_profile(z_bin[i],np.array([a[0:5] for a in LayerMatrix[j]]), len(LayerMatrix[j])-2)
 
 	return Profile
 
@@ -254,9 +394,22 @@ def Reflectivity(q_bin,res_bin, LayerMatrix, resolution,bkg,scale,patches,mp):
 				#print([a[0:5] for a in LayerMatrix[j]])
 				#print(flayers)
 				if resolution == -1:
-					Refl[i][1]=Refl[i][1]+patches[j]*scale*f_realref(0,q_bin[i],res_bin[i]/q_bin[i],[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)+bkg
+					if engine == 'fortran':
+						Refl[i][1]=Refl[i][1]+patches[j]*scale*f_realref(0,q_bin[i],res_bin[i]/q_bin[i],[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)+bkg
+					elif engine == 'numba':
+						Refl[i][1]=Refl[i][1]+patches[j]*scale*real_refl(0,float(q_bin[i]),float(res_bin[i]/q_bin[i]),np.array([a[0:5] for a in LayerMatrix[j]]),len(LayerMatrix[j])-2)+bkg
+					else:
+						Refl[i][1]=Refl[i][1]+patches[j]*scale*real_refl(0,float(q_bin[i]),float(res_bin[i]/q_bin[i]),np.array([a[0:5] for a in LayerMatrix[j]]),len(LayerMatrix[j])-2)+bkg
+
+
 				else:
-					Refl[i][1]=Refl[i][1]+patches[j]*scale*f_realref(0,q_bin[i],res_bin[i],[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)+bkg
+					if engine == 'fortran':
+						Refl[i][1]=Refl[i][1]+patches[j]*scale*f_realref(0,q_bin[i],res_bin[i],[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)+bkg
+					elif engine == 'numba':
+						Refl[i][1]=Refl[i][1]+patches[j]*scale*real_refl(0,float(q_bin[i]),float(res_bin[i]),np.array([a[0:5] for a in LayerMatrix[j]]),len(LayerMatrix[j])-2)+bkg
+					else:
+						Refl[i][1]=Refl[i][1]+patches[j]*scale*real_refl(0,float(q_bin[i]),float(res_bin[i]),np.array([a[0:5] for a in LayerMatrix[j]]),len(LayerMatrix[j])-2)+bkg
+
 				#The following line for pure Python calculation
 				#Refl[i][1]=real_refl(q_bin[i], LayerMatrix, np.size(LayerMatrix,0)-2, res_bin[i])
 			Refl[i][2]=Refl[i][1]*np.power(Refl[i][0],4)  # q_bin[i]**4		
@@ -284,8 +437,12 @@ def solvent_penetration(LayerMatrix, npoints):
 		z_bin = np.linspace(-4*LayerMatrix[j][0][3]-5.0, global_total_d+4*LayerMatrix[j][len(LayerMatrix[j])-2][3]+5.0, npoints+1)
 		for i in range(len(z_bin)-1):
 			Profile[j][i][0]=z_bin[i]
-			#Profile[j][i][1]=calc_solvent_penetration(z_bin[i],LayerMatrix[j], len(LayerMatrix[j])-2) # Python
-			Profile[j][i][1]=f_solventcalc(z_bin[i],[a[0:5] for a in LayerMatrix[j]], len(LayerMatrix[j])-2) #Fortran
+			if engine == 'fortran':
+				Profile[j][i][1]=f_solventcalc(z_bin[i],[a[0:5] for a in LayerMatrix[j]], len(LayerMatrix[j])-2) #Fortran
+			elif engine == 'numba':
+				Profile[j][i][1]=calc_solvent_penetration(z_bin[i],np.array([a[0:5] for a in LayerMatrix[j]]), len(LayerMatrix[j])-2) # Python
+			else:
+				Profile[j][i][1]=calc_solvent_penetration(z_bin[i],np.array([a[0:5] for a in LayerMatrix[j]]), len(LayerMatrix[j])-2) # Python
 
 	return Profile
 
@@ -299,21 +456,40 @@ def chi_square(data, LayerMatrix, resolution, bkg, scale, patches):
 		if data[i][2] == 0:
 			if resolution != -1:
 				for j in range(len(LayerMatrix)):
-					#flayers = np.array(LayerMatrix[j])
-					chi=chi+patches[j]*(1.0/float(Nexp))*((data[i][1]-scale*f_realref(0,data[i][0],resolution,[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)-bkg))**2
+					if engine == 'fortran':
+						chi=chi+patches[j]*(1.0/float(Nexp))*((data[i][1]-scale*f_realref(0,data[i][0],resolution,[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)-bkg))**2
+					elif engine == 'numba':
+						chi=chi+patches[j]*(1.0/float(Nexp))*((data[i][1]-scale*real_refl(0,float(data[i][0]),float(resolution),np.array([a[0:5] for a in LayerMatrix[j]]),len(LayerMatrix[j])-2)-bkg))**2
+					else:
+						chi=chi+patches[j]*(1.0/float(Nexp))*((data[i][1]-scale*real_refl(0,float(data[i][0]),float(resolution),np.array([a[0:5] for a in LayerMatrix[j]]),len(LayerMatrix[j])-2)-bkg))**2
 			else:
 				for j in range(len(LayerMatrix)):
-					#flayers = np.array(LayerMatrix[j])
-					chi=chi+patches[j]*(1.0/float(Nexp))*((data[i][1]-scale*f_realref(0,data[i][0],data[i][3]/data[i][0],[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)-bkg))**2
+					if engine == 'fortran':
+						chi=chi+patches[j]*(1.0/float(Nexp))*((data[i][1]-scale*f_realref(0,data[i][0],data[i][3]/data[i][0],[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)-bkg))**2
+					elif engine == 'numba':
+						chi=chi+patches[j]*(1.0/float(Nexp))*((data[i][1]-scale*real_refl(0,float(data[i][0]),float(data[i][3]/data[i][0]),np.array([a[0:5] for a in LayerMatrix[j]]),len(LayerMatrix[j])-2)-bkg))**2
+					else:
+						chi=chi+patches[j]*(1.0/float(Nexp))*((data[i][1]-scale*real_refl(0,float(data[i][0]),float(data[i][3]/data[i][0]),np.array([a[0:5] for a in LayerMatrix[j]]),len(LayerMatrix[j])-2)-bkg))**2
+
 		else:
 			if resolution != -1:
 				for j in range(len(LayerMatrix)):
-					#flayers = np.array(LayerMatrix[j])
-					chi=chi+patches[j]*(1.0/float(Nexp))*((data[i][1]-scale*f_realref(0,data[i][0],resolution,[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)-bkg)/(data[i][2]))**2
+					if engine == 'fortran':
+						chi=chi+patches[j]*(1.0/float(Nexp))*((data[i][1]-scale*f_realref(0,data[i][0],resolution,[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)-bkg)/(data[i][2]))**2
+					elif engine == 'numba':
+						chi=chi+patches[j]*(1.0/float(Nexp))*((data[i][1]-scale*real_refl(0,float(data[i][0]),float(resolution),np.array([a[0:5] for a in LayerMatrix[j]]),len(LayerMatrix[j])-2)-bkg)/(data[i][2]))**2
+					else:
+						chi=chi+patches[j]*(1.0/float(Nexp))*((data[i][1]-scale*real_refl(0,float(data[i][0]),float(resolution),np.array([a[0:5] for a in LayerMatrix[j]]),len(LayerMatrix[j])-2)-bkg)/(data[i][2]))**2
 			else:
 				for j in range(len(LayerMatrix)):
 					#flayers = np.array(LayerMatrix[j])
-					chi=chi+patches[j]*(1.0/float(Nexp))*((data[i][1]-scale*f_realref(0,data[i][0],data[i][3]/data[i][0],[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)-bkg)/(data[i][2]))**2
+					if engine == 'fortran':
+						chi=chi+patches[j]*(1.0/float(Nexp))*((data[i][1]-scale*f_realref(0,data[i][0],data[i][3]/data[i][0],[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)-bkg)/(data[i][2]))**2
+					elif engine == 'numba':
+						chi=chi+patches[j]*(1.0/float(Nexp))*((data[i][1]-scale*real_refl(0,float(data[i][0]),float(data[i][3]/data[i][0]),np.array([a[0:5] for a in LayerMatrix[j]]),len(LayerMatrix[j])-2)-bkg)/(data[i][2]))**2	
+					else:	
+						chi=chi+patches[j]*(1.0/float(Nexp))*((data[i][1]-scale*real_refl(0,float(data[i][0]),float(data[i][3]/data[i][0]),np.array([a[0:5] for a in LayerMatrix[j]]),len(LayerMatrix[j])-2)-bkg)/(data[i][2]))**2	
+
 	return chi
 
 
@@ -406,13 +582,22 @@ def fig_of_merit_sym(x, *argv):
 				if resolution[curve] != -1:
 					h3=0.0
 					for k in range(len(layers_max)):
-						#flayers = np.array(layers[k])
-						h3=h3+patches[k]*scl*f_realref(0,data[curve][i,0],resolution[curve],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+						if engine == 'fortran':
+							h3=h3+patches[k]*scl*f_realref(0,data[curve][i,0],resolution[curve],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+						elif engine == 'numba':
+							h3=h3+patches[k]*scl*real_refl(0,float(data[curve][i,0]),float(resolution[curve]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
+						else:
+							h3=h3+patches[k]*scl*real_refl(0,float(data[curve][i,0]),float(resolution[curve]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
 				else:
 					h3=0.0
 					for k in range(len(layers_max)):
-						#flayers = np.array(layers[k])
-						h3=h3+patches[k]*scl*f_realref(0,data[curve][i,0],data[curve][i,3]/data[curve][i,0],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+						if engine == 'fortran': 
+							h3=h3+patches[k]*scl*f_realref(0,data[curve][i,0],data[curve][i,3]/data[curve][i,0],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+						elif engine =='numba':
+							h3=h3+patches[k]*scl*real_refl(0,float(data[curve][i,0]),float(data[curve][i,3]/data[curve][i,0]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
+						else:
+							h3=h3+patches[k]*scl*real_refl(0,float(data[curve][i,0]),float(data[curve][i,3]/data[curve][i,0]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
+
 				if experror == False:
 					h1=h1+(1.0/float(Nexp))*((data[curve][i,1]-h3)/(h3))**2
 				else:
@@ -428,13 +613,22 @@ def fig_of_merit_sym(x, *argv):
 				if resolution[curve] != -1:
 					h3=0.0
 					for k in range(len(layers_max)):
-						#flayers = np.array(layers[k])
-						h3=h3+patches[k]*scl*f_realref(0,data[curve][i,0],resolution[curve],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+						if engine == 'fortran':
+							h3=h3+patches[k]*scl*f_realref(0,data[curve][i,0],resolution[curve],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+						elif engine == 'numba':
+							h3=h3+patches[k]*scl*real_refl(0,float(data[curve][i,0]),float(resolution[curve]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
+						else:
+							h3=h3+patches[k]*scl*real_refl(0,float(data[curve][i,0]),float(resolution[curve]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
 				else:
 					h3=0.0
 					for k in range(len(layers_max)):
-						#flayers = np.array(layers[k])
-						h3=h3+patches[k]*scl*f_realref(0,data[curve][i,0],data[curve][i,3]/data[curve][i,0],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+						if engine == 'fortran':
+							h3=h3+patches[k]*scl*f_realref(0,data[curve][i,0],data[curve][i,3]/data[curve][i,0],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+						elif engine == 'numba':
+							h3=h3+patches[k]*scl*real_refl(0,float(data[curve][i,0]),float(data[curve][i,3]/data[curve][i,0]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
+						else:
+							h3=h3+patches[k]*scl*real_refl(0,float(data[curve][i,0]),float(data[curve][i,3]/data[curve][i,0]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
+
 				if experror == True:
 					h1=h1+(1.0/float(Nexp))*((np.log10(data[curve][i,1])-np.log10(h3))/np.absolute((data[curve][i,2])/(np.log(10.0)*data[curve][i,1])))**2
 				else:
@@ -516,13 +710,21 @@ def reduced_chi_sym(x, *argv):
 				if resolution[curve] != -1:
 					h3=0.0
 					for k in range(len(layers_max)):
-						#flayers = np.array(layers[k])
-						h3=h3+patches[k]*scl*f_realref(0,data[curve][i,0],resolution[curve],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+						if engine == 'fortran':
+							h3=h3+patches[k]*scl*f_realref(0,data[curve][i,0],resolution[curve],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+						elif engine == 'numba':
+							h3=h3+patches[k]*scl*real_refl(0,float(data[curve][i,0]),float(resolution[curve]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
+						else:
+							h3=h3+patches[k]*scl*real_refl(0,float(data[curve][i,0]),float(resolution[curve]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
 				else:
 					h3=0.0
 					for k in range(len(layers_max)):
-						#flayers = np.array(layers[k])
-						h3=h3+patches[k]*scl*f_realref(0,data[curve][i,0],data[curve][i,3]/data[curve][i,0],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+						if engine == 'fortran':
+							h3=h3+patches[k]*scl*f_realref(0,data[curve][i,0],data[curve][i,3]/data[curve][i,0],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+						elif engine == 'numba':
+							h3=h3+patches[k]*scl*real_refl(0,float(data[curve][i,0]),float(data[curve][i,3]/data[curve][i,0]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
+						else:
+							h3=h3+patches[k]*scl*real_refl(0,float(data[curve][i,0]),float(data[curve][i,3]/data[curve][i,0]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
 				#h1=h1+(1.0/float(Nexp))*((data[i][1]-h3)/(h3))**2
 				h1=h1+(1.0/float(Nexp))*((data[curve][i,1]-h3)/data[curve][i,2])**2
 				h2=h2+1.0
@@ -535,13 +737,21 @@ def reduced_chi_sym(x, *argv):
 				if resolution[curve] != -1:
 					h3=0.0
 					for k in range(len(layers_max)):
-						#flayers = np.array(layers[k])
-						h3=h3+patches[k]*scl*f_realref(0,data[curve][i][0],resolution[curve],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+						if engine == 'fortran':
+							h3=h3+patches[k]*scl*f_realref(0,data[curve][i][0],resolution[curve],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+						elif engine == 'numba':
+							h3=h3+patches[k]*scl*real_refl(0,float(data[curve][i][0]),float(resolution[curve]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
+						else:
+							h3=h3+patches[k]*scl*real_refl(0,float(data[curve][i][0]),float(resolution[curve]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
 				else:
 					h3=0.0
 					for k in range(len(layers_max)):
-						#flayers = np.array(layers[k])
-						h3=h3+patches[k]*scl*f_realref(0,data[curve][i][0],data[curve][i][3]/data[curve][i][0],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+						if engine == 'fortran':
+							h3=h3+patches[k]*scl*f_realref(0,data[curve][i][0],data[curve][i][3]/data[curve][i][0],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+						elif engine == 'numba':
+							h3=h3+patches[k]*scl*real_refl(0,float(data[curve][i][0]),float(data[curve][i][3]/data[curve][i][0]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
+						else:
+							h3=h3+patches[k]*scl*real_refl(0,float(data[curve][i][0]),float(data[curve][i][3]/data[curve][i][0]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
 				h1=h1+(1.0/float(Nexp))*((np.log10(data[curve][i,1])-np.log10(h3))/np.absolute((data[curve][i,2])/(np.log(10.0)*data[curve][i,1])))**2
 				h2=h2+1.0
 
@@ -691,13 +901,21 @@ def log_likelihood(theta, *argv):
 			if resolution[curve] != -1:
 				model[i]=0.0
 				for k in range(len(layers_max)):
-					#flayers = np.array(layers[k])
-					model[i] = model[i]+patches[k]*scl*f_realref(0,data[curve][i][0],resolution[curve],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+					if engine == 'fortran':
+						model[i] = model[i]+patches[k]*scl*f_realref(0,data[curve][i][0],resolution[curve],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+					elif engine == 'numba':
+						model[i] = model[i]+patches[k]*scl*real_refl(0,float(data[curve][i][0]),float(resolution[curve]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
+					else:
+						model[i] = model[i]+patches[k]*scl*real_refl(0,float(data[curve][i][0]),float(resolution[curve]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg						
 			else:
 				model[i]=0.0
 				for k in range(len(layers_max)):
-					#flayers = np.array(layers[k])
-					model[i] = model[i]+patches[k]*scl*f_realref(0,data[curve][i][0],data[curve][i][3]/data[curve][i][0],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+					if engine == 'fortran':
+						model[i] = model[i]+patches[k]*scl*f_realref(0,data[curve][i][0],data[curve][i][3]/data[curve][i][0],[a[0:5] for a in layers[k]],len(layers[k])-2)+bkg
+					elif engine == 'numba':
+						model[i] = model[i]+patches[k]*scl*real_refl(0,float(data[curve][i][0]),float(data[curve][i][3]/data[curve][i][0]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
+					else:
+						model[i] = model[i]+patches[k]*scl*real_refl(0,float(data[curve][i][0]),float(data[curve][i][3]/data[curve][i][0]),np.array([a[0:5] for a in layers[k]]),len(layers[k])-2)+bkg
 		if fit_mode == 0:
 			sigma2 = yerr ** 2
 			logl = logl + fit_weight[curve]*(-0.5 * np.sum((y - model) ** 2 / sigma2 + np.log(2*np.pi*sigma2)))
@@ -1116,6 +1334,10 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 	Note that `sigma_i` represents the roughness between layer_i and 
 	layer_(i+1) 
 
+	The thickness of layer 0 and layer N is infinite by default. We use
+	the convention of inserting a value equal to zero although any numerical
+	value will not affect the calculations.
+
 	*model_param* : Global parameter list of X 5-element lists.
 
 	```python
@@ -1416,6 +1638,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 	else:
 		mp=1
 
+
 	warnings.filterwarnings("ignore", category=RuntimeWarning)  # This to filter RuntimeWarning especially from numdifftools
 	#np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)  
 	num_curves=np.size(in_file,0)
@@ -1437,7 +1660,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 
 	print('--------------------------------------------------------------------')
 	print('Program ANAKLASIS - Fit Module for X-ray/Neutron reflection datasets')
-	print('version 1.5.2, August 2021')
+	print('version 1.6.0, August 2021')
 	print('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ')
 	print('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de')
 	print('--------------------------------------------------------------------')
@@ -1990,6 +2213,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 		for i in range(len(layers_min)):
 			mnlayers.append(np.size(layers_min[i],0))
 		df=nd.Hessdiag(reduced_chi_sym)(de_results,data,resolution,mnlayers,m_param,layers_max,model_param,fit_mode,num_curves,c_param,multi_param,f_layer_fun,fit_weight,patches,free_param)
+
 
 		df_counter=0
 		df_layers=[]
@@ -3176,7 +3400,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 		f = open(project+"_final_parameters.log", "w")
 		f.write('--------------------------------------------------------------------\n')
 		f.write('Program ANAKLASIS - Fit Module for X-ray/Neutron reflection datasets\n')
-		f.write('version 1.5.2, August 2021\n')
+		f.write('version 1.6.0, August 2021\n')
 		f.write('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ\n')
 		f.write('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de\n')
 		f.write('--------------------------------------------------------------------\n')
@@ -3610,6 +3834,11 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 	print('numdifftools: '+nd.__version__)
 	print('sympy: '+sympy.__version__)
 	print('emcee: '+emcee.__version__)
+	if engine == 'numba': print('numba: '+numba.__version__)
+	if engine == 'python':
+		print('')
+		print('Warning! Numba package is not installed! You are using a very slow calculation engine!')
+		print('')
 
 	if project != 'none':
 		f.write('Library versions used for the calculations:\n')
@@ -3618,6 +3847,11 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 		f.write('numdifftools: '+nd.__version__+'\n')
 		f.write('sympy: '+sympy.__version__+'\n')
 		f.write('emcee: '+emcee.__version__+'\n')
+		if engine == 'numba': f.write('numba: '+numba.__version__+'\n')
+		if engine == 'python':
+			f.write('\n')
+			f.write('Warning! Numba package is not installed! You are using a very slow calculation engine!\n')
+			f.write('\n')
 
 		f.close()
 		os.chdir('..')
@@ -3832,6 +4066,10 @@ def calculate(project,resolution, patches, system, system_param, background, sca
 
 	Note that sigma_i represents the roughness between layer_i and layer_(i+1) 
 
+	The thickness of layer 0 and layer N is infinite by default. We use
+	the convention of inserting a value equal to zero although any numerical
+	value will not affect the calculations.
+
 	*system_param* : Global parameter list of X 3-element lists.
 
 	```python
@@ -3964,7 +4202,7 @@ def calculate(project,resolution, patches, system, system_param, background, sca
 
 	print('--------------------------------------------------------------------')
 	print('Program ANAKLASIS - Calculation Module for X-ray/Neutron reflection ')
-	print('version 1.5.2, August 2021')
+	print('version 1.6.0, August 2021')
 	print('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ')
 	print('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de')
 	print('--------------------------------------------------------------------')
@@ -4059,7 +4297,7 @@ def calculate(project,resolution, patches, system, system_param, background, sca
 		f = open(project+"_calculation_parameters.log", "w")
 		f.write('--------------------------------------------------------------------\n')
 		f.write('Program ANAKLASIS - Calculation Module for X-ray/Neutron reflection \n')
-		f.write('version 1.5.2, August 2021\n')
+		f.write('version 1.6.0, August 2021\n')
 		f.write('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ\n')
 		f.write('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de\n')
 		f.write('--------------------------------------------------------------------\n')
@@ -4267,6 +4505,11 @@ def calculate(project,resolution, patches, system, system_param, background, sca
 	print('scipy: '+scipy.__version__)
 	print('numdifftools: '+nd.__version__)
 	print('sympy: '+sympy.__version__)
+	if engine == 'numba': print('numba: '+numba.__version__)
+	if engine == 'python':
+		print('')
+		print('Warning! Numba package is not installed! You are using a very slow calculation engine!')
+		print('')
 
 	if project != 'none':
 		f.write('Library versions used for the calculations:\n')
@@ -4274,7 +4517,11 @@ def calculate(project,resolution, patches, system, system_param, background, sca
 		f.write('scipy: '+scipy.__version__+'\n')
 		f.write('numdifftools: '+nd.__version__+'\n')
 		f.write('sympy: '+sympy.__version__+'\n')
-
+		if engine == 'numba': f.write('numba: '+numba.__version__+'\n')
+		if engine == 'python':
+			f.write('\n')
+			f.write('Warning! Numba package is not installed! You are using a very slow calculation engine!\n')
+			f.write('\n')
 
 	#res={
 	#"reflectivity": Refl,
@@ -4428,6 +4675,10 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 	ignored. 
 
 	Note that sigma_i represents the roughness between layer_i and layer_(i+1) 
+
+	The thickness of layer 0 and layer N is infinite by default. We use
+	the convention of inserting a value equal to zero although any numerical
+	value will not affect the calculations.
 
 	*system_param* : Global parameter list of X 3-element lists.
 
@@ -4593,7 +4844,7 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 
 	print('--------------------------------------------------------------------')
 	print('Program ANAKLASIS - Comparison Module for X-ray/Neutron reflection ')
-	print('version 1.5.2, August 2021')
+	print('version 1.6.0, August 2021')
 	print('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ')
 	print('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de')
 	print('--------------------------------------------------------------------')
@@ -4750,7 +5001,7 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 		f = open(project+"_comparison_parameters.log", "w")
 		f.write('--------------------------------------------------------------------\n')
 		f.write('Program ANAKLASIS - Comparison Module for X-ray/Neutron reflection \n')
-		f.write('version 1.5.2, August 2021\n')
+		f.write('version 1.6.0, August 2021\n')
 		f.write('developed by Dr. Alexandros Koutsioumpas. JCNS @ MLZ\n')
 		f.write('for bugs and requests contact: a.koutsioumpas[at]fz-juelich.de\n')
 		f.write('--------------------------------------------------------------------\n')
@@ -5039,6 +5290,11 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 	print('scipy: '+scipy.__version__)
 	print('numdifftools: '+nd.__version__)
 	print('sympy: '+sympy.__version__)
+	if engine == 'numba': print('numba: '+numba.__version__)
+	if engine == 'python':
+		print('')
+		print('Warning! Numba package is not installed! You are using a very slow calculation engine!')
+		print('')	
 
 	if project != 'none':
 		f.write('Library versions used for the calculations:\n')
@@ -5046,6 +5302,11 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 		f.write('scipy: '+scipy.__version__+'\n')
 		f.write('numdifftools: '+nd.__version__+'\n')
 		f.write('sympy: '+sympy.__version__+'\n')
+		if engine == 'numba': f.write('numba: '+numba.__version__+'\n')
+		if engine == 'python':
+			f.write('\n')
+			f.write('Warning! Numba package is not installed! You are using a very slow calculation engine!\n')
+			f.write('\n')
 
 	# res={
 	# "reflectivity": Refl,
