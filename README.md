@@ -8,7 +8,7 @@ Full description of used methods will be reported in the form of an open-access 
 
 ## Installation
 
-It is adviced to install a _FORTRAN_ compiler on your system before proceeding with installation, so that the _FORTRAN_ extensions for reflectivity calculations can be compiled. If you perform the installation without a _FORTRAN_ compiler, a _Python_ calculation engine will be used by the package. The engine can be considerably accelerated by installing the [_Numba_ package](https://numba.readthedocs.io/en/stable/user/installing.html) after installing _anaklasis_.
+It is adviced to install a _FORTRAN_ compiler on your system before proceeding with installation, so that the extensions for reflectivity calculations can be compiled. If you perform the installation without a _FORTRAN_ compiler, a _Python_ calculation engine will be used by the package. The engine can be considerably accelerated by installing the [_Numba_ package](https://numba.readthedocs.io/en/stable/user/installing.html) after installing _anaklasis_.
 
 Note that calculations with _Numba_ are 30-40% slower than with the _FORTRAN_ extensions, while _Python_ calculation engine without _Numba_ installed can be more than 20-30 times slower than the _FORTRAN_ extensions.
 
