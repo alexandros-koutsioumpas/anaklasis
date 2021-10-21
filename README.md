@@ -4,7 +4,7 @@
 
 In the examples folder many scripts with calculations and refinements performed by the program can be found. Addiitonaly some _Jupyter notebooks_ explaining the input and output are included.
 
-Full description of used methods are reported in an open-access article at the [_Joural of Applied Crystallography_][https://doi.org/10.1107/S1600576721009262].
+Full description of used methods are reported in an open-access article at the [_Joural of Applied Crystallography_](https://doi.org/10.1107/S1600576721009262).
 
 ## Installation
 
