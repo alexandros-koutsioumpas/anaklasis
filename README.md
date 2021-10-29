@@ -2,7 +2,7 @@
 
 [_anaklasis_](https://github.com/alexandros-koutsioumpas/anaklasis) is a set of open-source _Python3_ scripts (with _FORTRAN 90_ extensions) that facilitate a range of specular neutron and x-ray reflectivity calculations, involving the generation of theoretical curves and the comparison/fit of interfacial model reflectivity against experimental datasets.  The _ref_ module, contains three callable functions, _ref.calculate_ for generating theoretical reflectivity curves, _ref.compare_ for comparison of experimental data with theoretical curves and _ref.fit_ for refinement of experimental data against a defined model. Execution takes place by defining the interfacial model and instrumental parameters as lists in a simple _Python_ script and by passing them as arguments to the desired function.
 
-In the examples folder many scripts with calculations and refinements performed by the program can be found. Addiitonaly some [_Jupyter notebooks_](https://github.com/alexandros-koutsioumpas/anaklasis/tree/main/examples-Jupyter) explaining the input and output are included.
+In the [examples folder](https://github.com/alexandros-koutsioumpas/anaklasis/tree/main/examples) many scripts with calculations and refinements performed by the program can be found. Addiitonaly some [_Jupyter notebooks_](https://github.com/alexandros-koutsioumpas/anaklasis/tree/main/examples-Jupyter) explaining the input and output are included.
 
 Full description of used methods is reported in an open-access article at the [_Journal of Applied Crystallography_](https://doi.org/10.1107/S1600576721009262).
 
