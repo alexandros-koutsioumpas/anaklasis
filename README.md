@@ -160,6 +160,23 @@ On _macOS_ and _Linux_ before performing a bootstrap analysis you might need to 
 ```bash
 ulimit -n 2048
 ```
+## Jupyter notebook examples
+
+Jupyter notebook examples of model calculations
+
+- [XRR of supported lipid membrane at the water/Si interface](https://github.com/alexandros-koutsioumpas/anaklasis/blob/main/examples-Jupyter/XRR_lipid_membrane_calculations.ipynb)
+- [X-ray reflectivity calculations (2 layers)](https://github.com/alexandros-koutsioumpas/anaklasis/blob/main/examples-Jupyter/XRR_calculations_2_layers.ipynb)
+- [Data/Theory compasion for NR of supported lipid membrane](https://github.com/alexandros-koutsioumpas/anaklasis/blob/main/examples-Jupyter/NR_membrane_data_theory_comparison.ipynb)
+
+
+Jupyter notebook examples of data refinements
+
+- [Polymer Brush (single neutron reflection curve)](https://github.com/alexandros-koutsioumpas/anaklasis/blob/main/examples-Jupyter/Brush_Neutron_reflectivity_fit.ipynb)
+- [Polydisperse polymer brush (single neutron reflection curve)](https://github.com/alexandros-koutsioumpas/anaklasis/blob/main/examples-Jupyter/Polydisperse_Brush_Neutron_reflectivity_fit.ipynb)
+- [adsorbed protein (two neutron reflection curves)](https://github.com/alexandros-koutsioumpas/anaklasis/blob/main/examples-Jupyter/lysozyme_fit.ipynb)
+- [compact polymer layer (ORSO example)](https://github.com/alexandros-koutsioumpas/anaklasis/blob/main/examples-Jupyter/ORSO_example.ipynb)
+- [supported lipid bilayer (3 neutron reflection curves)](https://github.com/alexandros-koutsioumpas/anaklasis/blob/main/examples-Jupyter/lipid_membrane_3_NR_contrast_fit.ipynb)
+
 
 ## License
 [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
