@@ -1,7 +1,7 @@
 dependencies:
     - python=3.9
     - numpy=1.22.4
-    - matplotlib
+    - matplotlib=3.7
     - scipy
     - numdifftools
     - sympy
