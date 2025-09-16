@@ -178,6 +178,7 @@ Jupyter notebook examples of data refinements
 - [adsorbed protein (two neutron reflection curves)](https://github.com/alexandros-koutsioumpas/anaklasis/blob/main/examples-Jupyter/lysozyme_fit.ipynb)
 - [compact polymer layer (ORSO example)](https://github.com/alexandros-koutsioumpas/anaklasis/blob/main/examples-Jupyter/ORSO_example.ipynb)
 - [supported lipid bilayer (3 neutron reflection curves)](https://github.com/alexandros-koutsioumpas/anaklasis/blob/main/examples-Jupyter/lipid_membrane_3_NR_contrast_fit.ipynb)
+- [Co-refinement of PNR and XRR data](https://github.com/alexandros-koutsioumpas/anaklasis/blob/main/examples-Jupyter/NR_XRR_Fit_AlO3_Co_Pt.ipynb)
 
 
 ## License
