@@ -11,7 +11,9 @@ from setuptools.command.build_py import build_py as _build_py
 from setuptools.dist import Distribution
 
 HERE = os.path.abspath(os.path.dirname(__file__))
-F90_SOURCE = os.path.join('anaklasis', 'fortran_ref_functions.f90')
+# Must be absolute: f2py's meson backend copies sources into its own
+# scratch build directory, and a relative path does not survive that.
+F90_SOURCE = os.path.join(HERE, 'anaklasis', 'fortran_ref_functions.f90')
 MODULE_NAME = 'fortran_ref'
 
 # anaklasis/ref.py does `from fortran_ref import ...` (an absolute, top-level
@@ -75,7 +77,9 @@ setup(
     author='Alexandros Koutsioumpas',
     author_email='a.koutsioumpas@fz-juelich.de',
     description='Neutron and X-ray reflectivity calculations',
+    license='GPL-3.0-only',
     packages=setuptools.find_packages(),
+    package_data={'anaklasis': ['fortran_ref_functions.f90']},
     cmdclass={'build_py': build_py},
     distclass=BinaryDistribution,
     classifiers=[
@@ -83,7 +87,6 @@ setup(
         "Operating System :: OS Independent",
         'Environment :: Console',
         'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
        ],
     python_requires='>=3.7',
     zip_safe=False,
