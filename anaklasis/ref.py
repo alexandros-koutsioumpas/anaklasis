@@ -406,9 +406,9 @@ def Reflectivity(q_bin,res_bin, LayerMatrix, resolution,bkg,scale,patches,mp):
 					if engine == 'fortran':
 						Refl[i][1]=Refl[i][1]+patches[j]*scale*f_realref(0,q_bin[i],res_bin[i],[a[0:5] for a in LayerMatrix[j]],len(LayerMatrix[j])-2)+bkg
 					elif engine == 'numba':
-						Refl[i][1]=Refl[i][1]+patches[j]*scale*real_refl(0,float(q_bin[i]),float(res_bin[i]),np.array([a[0:5] for a in LayerMatrix[j]]),len(LayerMatrix[j])-2)+bkg
+						Refl[i][1]=Refl[i][1]+patches[j]*scale*real_refl(0,float(q_bin[i].item()),float(res_bin[i].item()),np.array([a[0:5] for a in LayerMatrix[j]]),len(LayerMatrix[j])-2)+bkg
 					else:
-						Refl[i][1]=Refl[i][1]+patches[j]*scale*real_refl(0,float(q_bin[i]),float(res_bin[i]),np.array([a[0:5] for a in LayerMatrix[j]]),len(LayerMatrix[j])-2)+bkg
+						Refl[i][1]=Refl[i][1]+patches[j]*scale*real_refl(0,float(q_bin[i].item()),float(res_bin[i].item()),np.array([a[0:5] for a in LayerMatrix[j]]),len(LayerMatrix[j])-2)+bkg
 
 				#The following line for pure Python calculation
 				#Refl[i][1]=real_refl(q_bin[i], LayerMatrix, np.size(LayerMatrix,0)-2, res_bin[i])
@@ -532,21 +532,21 @@ def fig_of_merit_sym(x, *argv):
 		for i in range(0,len(model_constraints)):
 			if '>' in str(model_constraints[i]) or '<' in str(model_constraints[i]):
 				if center_fun[i] == '>':
-					left=np.float((f_left_fun(i,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39])))
-					right=np.float((f_right_fun(i,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39])))
+					left=float((f_left_fun(i,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39])))
+					right=float((f_right_fun(i,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39])))
 
 					if left < right:
 						fom=np.inf
 						#print(f'FOM = {fom}\r', end="       ")
-						return np.float('inf')
+						return float('inf')
 
 				if center_fun[i] == '<':
-					left=np.float((f_left_fun(i,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39])))
-					right=np.float((f_right_fun(i,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39])))
+					left=float((f_left_fun(i,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39])))
+					right=float((f_right_fun(i,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39])))
 					if left > right:
 						fom=np.inf
 						#print(f'FOM = {fom}\r', end="       ")
-						return np.float('inf')
+						return float('inf')
 
 		layers=[]
 		for k in range(len(layers_max)):
@@ -555,7 +555,7 @@ def fig_of_merit_sym(x, *argv):
 				line=[]
 				for j in range(0,5):
 					if isinstance(layers_max[k][i][j], str):
-						line.append(np.float((f_layer_fun(k,i,j,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],i,vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39]))))
+						line.append(float((f_layer_fun(k,i,j,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],i,vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39]))))
 					else:
 						if k > 0:
 							line.append(x[5*sum(Nlayers[0:k])+i*5+j])
@@ -682,7 +682,7 @@ def reduced_chi_sym(x, *argv):
 				line=[]
 				for j in range(0,5):
 					if isinstance(layers_max[k][i][j], str):
-						line.append(np.float((f_layer_fun(k,i,j,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],i,vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39]))))
+						line.append(float((f_layer_fun(k,i,j,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],i,vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39]))))
 					else:
 						if k > 0:
 							line.append(x[5*sum(Nlayers[0:k])+i*5+j])
@@ -879,7 +879,7 @@ def log_likelihood(theta, *argv):
 				line=[]
 				for j in range(0,5):
 					if isinstance(layers_max[l][i][j], str):
-						line.append(np.float((f_layer_fun(l,i,j,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],i,vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39]))))
+						line.append(float((f_layer_fun(l,i,j,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],i,vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39]))))
 					else:
 						if layers_min[l][i][j] != layers_max[l][i][j]:
 							line.append(theta[k])
@@ -948,43 +948,43 @@ def log_prior(theta, *argv):
 		for i in range(0,Nlayers[k]):
 			for j in range(0,5): 
 				if layers_min[k][i][j] != layers_max[k][i][j]:
-					if np.float(layers_min[k][i][j]) < theta[l] < np.float(layers_max[k][i][j]):
+					if float(layers_min[k][i][j]) < theta[l] < float(layers_max[k][i][j]):
 			  			cpass=cpass+1
 					l=l+1
 
 	for i in range(0,m_param):
 		if model_param[i][4] == 'uniform':
 			if model_param[i][1] != model_param[i][2]:
-				if np.float(model_param[i][1]) < theta[l] < np.float(model_param[i][2]):
+				if float(model_param[i][1]) < theta[l] < float(model_param[i][2]):
 			  		cpass=cpass+1
 				l=l+1
 		if model_param[i][4] == 'normal':
 			if model_param[i][2] != 0.0:
-				if np.float(model_param[i][1]-3*model_param[i][2]) < theta[l] < np.float(model_param[i][1]+3*model_param[i][2]):
+				if float(model_param[i][1]-3*model_param[i][2]) < theta[l] < float(model_param[i][1]+3*model_param[i][2]):
 			  		cpass=cpass+1
 				l=l+1
 
 	for i in range(0,num_curves):
 		if background[i][2] == 'uniform':
 			if background[i][0] != background[i][1]:
-				if np.float(background[i][0]) < theta[l] < np.float(background[i][1]):
+				if float(background[i][0]) < theta[l] < float(background[i][1]):
 					cpass=cpass+1
 				l=l+1
 		if background[i][2] == 'normal':
 			if background[i][1] != 0.0:
-				if np.float(background[i][0]-3*background[i][1]) < theta[l] < np.float(background[i][0]+3*background[i][1]):
+				if float(background[i][0]-3*background[i][1]) < theta[l] < float(background[i][0]+3*background[i][1]):
 					cpass=cpass+1
 				l=l+1
 
 	for i in range(0,num_curves):
 		if scale[i][2] == 'uniform':
 			if scale[i][0] != scale[i][1]:
-				if np.float(scale[i][0]) < theta[l] < np.float(scale[i][1]):
+				if float(scale[i][0]) < theta[l] < float(scale[i][1]):
 					cpass=cpass+1
 				l=l+1
 		if scale[i][2] == 'normal':
 			if scale[i][1] != 0.0:
-				if np.float(scale[i][0]-3*scale[i][1]) < theta[l] < np.float(scale[i][0]+3*scale[i][1]):
+				if float(scale[i][0]-3*scale[i][1]) < theta[l] < float(scale[i][0]+3*scale[i][1]):
 					cpass=cpass+1
 				l=l+1
 
@@ -992,12 +992,12 @@ def log_prior(theta, *argv):
 		for j in range(0,num_curves):
 			if multi_param[i][-1] == 'uniform':
 				if multi_param[i][2*j+1] != multi_param[i][2*j+2]:
-					if np.float(multi_param[i][2*j+1]) < theta[l] < np.float(multi_param[i][2*j+2]):
+					if float(multi_param[i][2*j+1]) < theta[l] < float(multi_param[i][2*j+2]):
 						cpass = cpass + 1
 					l=l+1
 			if multi_param[i][-1] == 'normal':
 				if multi_param[i][2*j+2] != 0.0:
-					if np.float(multi_param[i][2*j+1]-3*multi_param[i][2*j+2]) < theta[l] < np.float(multi_param[i][2*j+1]+3*multi_param[i][2*j+2]):
+					if float(multi_param[i][2*j+1]-3*multi_param[i][2*j+2]) < theta[l] < float(multi_param[i][2*j+1]+3*multi_param[i][2*j+2]):
 						cpass = cpass + 1
 					l=l+1
 
@@ -1069,15 +1069,15 @@ def log_prior(theta, *argv):
 		for i in range(0,len(model_constraints)):
 			if '>' in str(model_constraints[i]) or '<' in str(model_constraints[i]):
 				if center_fun[i] == '>':
-					left=np.float((f_left_fun(i,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39])))
-					right=np.float((f_right_fun(i,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39])))
+					left=float((f_left_fun(i,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39])))
+					right=float((f_right_fun(i,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39])))
 					if left < right:
 						return -np.inf
 
 
 				if center_fun[i] == '<':
-					left=np.float((f_left_fun(i,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39])))
-					right=np.float((f_right_fun(i,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39])))
+					left=float((f_left_fun(i,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39])))
+					right=float((f_right_fun(i,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39])))
 					if left > right:
 						return -np.inf
 
@@ -1159,15 +1159,15 @@ def log_probability(theta, *argv):
 
 def f_layer_fun(k,i,j,p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22,p23,p24,p25,p26,p27,p28,p29,p30,p31,p32,p33,p34,p35,p36,p37,p38,p39,n,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12,m13,m14,m15,m16,m17,m18,m19,m20,m21,m22,m23,m24,m25,m26,m27,m28,m29,m30,m31,m32,m33,m34,m35,m36,m37,m38,m39):
 	"""Internal anaklasis fuction"""
-	return np.float((layer_fun[k][i][j](p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22,p23,p24,p25,p26,p27,p28,p29,p30,p31,p32,p33,p34,p35,p36,p37,p38,p39,n,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12,m13,m14,m15,m16,m17,m18,m19,m20,m21,m22,m23,m24,m25,m26,m27,m28,m29,m30,m31,m32,m33,m34,m35,m36,m37,m38,m39)))
+	return float((layer_fun[k][i][j](p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22,p23,p24,p25,p26,p27,p28,p29,p30,p31,p32,p33,p34,p35,p36,p37,p38,p39,n,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12,m13,m14,m15,m16,m17,m18,m19,m20,m21,m22,m23,m24,m25,m26,m27,m28,m29,m30,m31,m32,m33,m34,m35,m36,m37,m38,m39)))
 
 def f_left_fun(i,p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22,p23,p24,p25,p26,p27,p28,p29,p30,p31,p32,p33,p34,p35,p36,p37,p38,p39,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12,m13,m14,m15,m16,m17,m18,m19,m20,m21,m22,m23,m24,m25,m26,m27,m28,m29,m30,m31,m32,m33,m34,m35,m36,m37,m38,m39):
 	"""Internal anaklasis fuction"""
-	return np.float((left_fun[i](p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22,p23,p24,p25,p26,p27,p28,p29,p30,p31,p32,p33,p34,p35,p36,p37,p38,p39,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12,m13,m14,m15,m16,m17,m18,m19,m20,m21,m22,m23,m24,m25,m26,m27,m28,m29,m30,m31,m32,m33,m34,m35,m36,m37,m38,m39)))
+	return float((left_fun[i](p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22,p23,p24,p25,p26,p27,p28,p29,p30,p31,p32,p33,p34,p35,p36,p37,p38,p39,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12,m13,m14,m15,m16,m17,m18,m19,m20,m21,m22,m23,m24,m25,m26,m27,m28,m29,m30,m31,m32,m33,m34,m35,m36,m37,m38,m39)))
 
 def f_right_fun(i,p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22,p23,p24,p25,p26,p27,p28,p29,p30,p31,p32,p33,p34,p35,p36,p37,p38,p39,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12,m13,m14,m15,m16,m17,m18,m19,m20,m21,m22,m23,m24,m25,m26,m27,m28,m29,m30,m31,m32,m33,m34,m35,m36,m37,m38,m39):
 	"""Internal anaklasis fuction"""
-	return np.float((right_fun[i](p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22,p23,p24,p25,p26,p27,p28,p29,p30,p31,p32,p33,p34,p35,p36,p37,p38,p39,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12,m13,m14,m15,m16,m17,m18,m19,m20,m21,m22,m23,m24,m25,m26,m27,m28,m29,m30,m31,m32,m33,m34,m35,m36,m37,m38,m39)))
+	return float((right_fun[i](p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22,p23,p24,p25,p26,p27,p28,p29,p30,p31,p32,p33,p34,p35,p36,p37,p38,p39,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12,m13,m14,m15,m16,m17,m18,m19,m20,m21,m22,m23,m24,m25,m26,m27,m28,m29,m30,m31,m32,m33,m34,m35,m36,m37,m38,m39)))
 
 def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patches, system, model_param, multi_param, model_constraints,background,scale,experror,plot=True,fast=True):
 	"""
@@ -2054,7 +2054,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 
 	# This function definition needs to be here in case this function in the main program
 	# def f_layer_fun(i,j,p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,n,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9):
-	# 	return np.float((layer_fun[i][j](p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,n,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9)))
+	# 	return float((layer_fun[i][j](p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,n,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9)))
 
 	global left_fun
 	global right_fun
@@ -2081,10 +2081,10 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 
 # Needs to be here in case this function acts as the main program
 # def f_left_fun(i,p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9):
-# 	return np.float((left_fun[i](p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9)))
+# 	return float((left_fun[i](p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9)))
 
 # def f_right_fun(i,p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9):
-# 	return np.float((right_fun[i](p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9)))
+# 	return float((right_fun[i](p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,m0,m1,m2,m3,m4,m5,m6,m7,m8,m9)))
 
 	m_param=0
 	for i in range(0,np.size(model_param,0)):
@@ -2233,8 +2233,8 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 						line.append(np.sqrt(2.0/df[df_counter]))
 						df_init.append(np.sqrt(2.0/df[df_counter]))
 					else:
-						line.append(np.float(0.0))
-						df_init.append(np.float(0.0))
+						line.append(float(0.0))
+						df_init.append(float(0.0))
 					df_counter = df_counter + 1
 				sub_df_layers.append(line)
 			df_layers.append(sub_df_layers)
@@ -2244,8 +2244,8 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 		 		df_vp.append(np.sqrt(2.0/df[df_counter]))
 		 		df_init.append(np.sqrt(2.0/df[df_counter]))
 			else:
-		 		df_vp.append(np.float(0.0))
-		 		df_init.append(np.float(0.0))
+		 		df_vp.append(float(0.0))
+		 		df_init.append(float(0.0))
 			df_counter = df_counter + 1
 
 		for i in range(0,num_curves):
@@ -2253,8 +2253,8 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 				df_bkg.append(np.sqrt(2.0/df[df_counter]))
 				df_init.append(np.sqrt(2.0/df[df_counter]))
 			else:
-				df_bkg.append(np.float(0.0))
-				df_init.append(np.float(0.0))
+				df_bkg.append(float(0.0))
+				df_init.append(float(0.0))
 			df_counter = df_counter + 1
 
 		for i in range(0,num_curves):
@@ -2262,8 +2262,8 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 				df_scl.append(np.sqrt(2.0/df[df_counter]))
 				df_init.append(np.sqrt(2.0/df[df_counter]))
 			else:
-				df_scl.append(np.float(0.0))
-				df_init.append(np.float(0.0))
+				df_scl.append(float(0.0))
+				df_init.append(float(0.0))
 			df_counter = df_counter + 1
 
 		for i in range(0,np.size(multi_param,0)):
@@ -2272,8 +2272,8 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 					df_vm.append(np.sqrt(2.0/df[df_counter]))
 					df_init.append(np.sqrt(2.0/df[df_counter]))
 				else:
-					df_vm.append(np.float(0.0))
-					df_init.append(np.float(0.0))
+					df_vm.append(float(0.0))
+					df_init.append(float(0.0))
 				df_counter = df_counter + 1
 
 
@@ -2319,7 +2319,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 				line=[]
 				for j in range(0,5):
 					if isinstance(layers_max[k][i][j], str):
-						line.append(np.float((f_layer_fun(k,i,j,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],i,vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39]))))
+						line.append(float((f_layer_fun(k,i,j,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],i,vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39]))))
 
 					else:
 						if k > 0:
@@ -2441,11 +2441,11 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 			while True:
 				for j in range(0,free_param):
 					while True:
-						if hsol[j] != 0.0: 
-							nsol[i][j]=np.float(hsol[j])*np.float(np.random.randn(1))
-							#nsol[i][j]=np.float(hsol[j])+(np.float(max_hsol[j]-min_hsol[j])/2.0)*np.float(np.random.randn(1))
+						if hsol[j] != 0.0:
+							nsol[i][j]=float(hsol[j])*float(np.random.randn())
+							#nsol[i][j]=float(hsol[j])+(float(max_hsol[j]-min_hsol[j])/2.0)*float(np.random.randn())
 						else:
-							nsol[i][j]=(np.float(max_hsol[j]-min_hsol[j])/2.0)*np.float(np.random.randn(1))
+							nsol[i][j]=(float(max_hsol[j]-min_hsol[j])/2.0)*float(np.random.randn())
 
 
 						if min_hsol[j] <= hsol[j]+1e-2*nsol[i][j] <=  max_hsol[j]: 
@@ -2628,7 +2628,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 							line=[]
 							for j in range(0,5):
 								if isinstance(layers_max[l][i][j], str):
-									line.append(np.float((f_layer_fun(l,i,j,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],i,vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39]))))
+									line.append(float((f_layer_fun(l,i,j,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],i,vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39]))))
 
 								else:
 									if layers_min[l][i][j] != layers_max[l][i][j]:
@@ -2661,8 +2661,8 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 			Refl[curve][:,1]=0.0
 			Refl2[curve][:,1]=0.0
 			for k in range(0,np.size(r_flat_samples,0)):
-				Refl[curve][:,1]=Refl[curve][:,1]+samples_Refl[curve,:,k+1]/np.float(np.size(r_flat_samples,0))
-				Refl2[curve][:,1]=Refl2[curve][:,1]+samples_Refl2[curve][:,k+1]/np.float(np.size(r_flat_samples,0))
+				Refl[curve][:,1]=Refl[curve][:,1]+samples_Refl[curve,:,k+1]/float(np.size(r_flat_samples,0))
+				Refl2[curve][:,1]=Refl2[curve][:,1]+samples_Refl2[curve][:,k+1]/float(np.size(r_flat_samples,0))
 
 
 			chi_s[curve]=0.0
@@ -2929,7 +2929,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 						line=[]
 						for k in range(0,5):
 							if isinstance(layers_max[l][j][k], str):
-								line.append(np.float((f_layer_fun(l,j,k,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],j,vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39]))))
+								line.append(float((f_layer_fun(l,j,k,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],j,vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39]))))
 							else:
 								if l>0:
 									line.append(results.x[5*sum(mnlayers[0:l])+j*5+k])
@@ -2966,8 +2966,8 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 			Refl[curve][:,1]=0.0
 			Refl2[curve][:,1]=0.0
 			for k in range(0,bt_iter):
-				Refl[curve][:,1]=Refl[curve][:,1]+samples_Refl[curve,:,k+1]/np.float(bt_iter)
-				Refl2[curve][:,1]=Refl2[curve][:,1]+samples_Refl2[curve][:,k+1]/np.float(bt_iter)
+				Refl[curve][:,1]=Refl[curve][:,1]+samples_Refl[curve,:,k+1]/float(bt_iter)
+				Refl2[curve][:,1]=Refl2[curve][:,1]+samples_Refl2[curve][:,k+1]/float(bt_iter)
 
 
 			chi_s[curve]=0.0
@@ -3443,7 +3443,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 					line=[]
 					for j in range(0,5):
 						if isinstance(layers_max[k][i][j], str):
-							line.append(np.float((f_layer_fun(k,i,j,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],i,vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39]))))
+							line.append(float((f_layer_fun(k,i,j,vp[0],vp[1],vp[2],vp[3],vp[4],vp[5],vp[6],vp[7],vp[8],vp[9],vp[10],vp[11],vp[12],vp[13],vp[14],vp[15],vp[16],vp[17],vp[18],vp[19],vp[20],vp[21],vp[22],vp[23],vp[24],vp[25],vp[26],vp[27],vp[28],vp[29],vp[30],vp[31],vp[32],vp[33],vp[34],vp[35],vp[36],vp[37],vp[38],vp[39],i,vm[0],vm[1],vm[2],vm[3],vm[4],vm[5],vm[6],vm[7],vm[8],vm[9],vm[10],vm[11],vm[12],vm[13],vm[14],vm[15],vm[16],vm[17],vm[18],vm[19],vm[20],vm[21],vm[22],vm[23],vm[24],vm[25],vm[26],vm[27],vm[28],vm[29],vm[30],vm[31],vm[32],vm[33],vm[34],vm[35],vm[36],vm[37],vm[38],vm[39]))))
 						else:
 							if k > 0:
 								line.append(results.x[5*sum(mnlayers[0:k])+i*5+j])
@@ -3629,7 +3629,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 				for j in range(0,5):
 					if isinstance(layers_max[k][i][j], str):
 						expr = sympy.sympify(layers_max[k][i][j])
-						line.append(np.float(expr.subs([(n,i),(p0,vp[0]),(p1,vp[1]),(p2,vp[2]),(p3,vp[3]),(p4,vp[4]),(p5,vp[5]),(p6,vp[6]),(p7,vp[7]),(p8,vp[8]),(p9,vp[9]),(p10,vp[10]),(p11,vp[11]),(p12,vp[12]),(p13,vp[13]),(p14,vp[14]),(p15,vp[15]),(p16,vp[16]),(p17,vp[17]),(p18,vp[18]),(p19,vp[19]),(p20,vp[20]),(p21,vp[21]),(p22,vp[22]),(p23,vp[23]),(p24,vp[24]),(p25,vp[25]),(p26,vp[26]),(p27,vp[27]),(p28,vp[28]),(p29,vp[29]),(p30,vp[30]),(p31,vp[31]),(p32,vp[32]),(p33,vp[33]),(p34,vp[34]),(p35,vp[35]),(p36,vp[36]),(p37,vp[37]),(p38,vp[38]),(p39,vp[39]),(m0,vm[0]),(m1,vm[1]),(m2,vm[2]),(m3,vm[3]),(m4,vm[4]),(m5,vm[5]),(m6,vm[6]),(m7,vm[7]),(m8,vm[8]),(m9,vm[9]),(m10,vm[10]),(m11,vm[11]),(m12,vm[12]),(m13,vm[13]),(m14,vm[14]),(m15,vm[15]),(m16,vm[16]),(m17,vm[17]),(m18,vm[18]),(m19,vm[19]),(m20,vm[20]),(m21,vm[21]),(m22,vm[22]),(m23,vm[23]),(m24,vm[24]),(m25,vm[25]),(m26,vm[26]),(m27,vm[27]),(m28,vm[28]),(m29,vm[29]),(m30,vm[30]),(m31,vm[31]),(m32,vm[32]),(m33,vm[33]),(m34,vm[34]),(m35,vm[35]),(m36,vm[36]),(m37,vm[37]),(m38,vm[38]),(m39,vm[39])])))
+						line.append(float(expr.subs([(n,i),(p0,vp[0]),(p1,vp[1]),(p2,vp[2]),(p3,vp[3]),(p4,vp[4]),(p5,vp[5]),(p6,vp[6]),(p7,vp[7]),(p8,vp[8]),(p9,vp[9]),(p10,vp[10]),(p11,vp[11]),(p12,vp[12]),(p13,vp[13]),(p14,vp[14]),(p15,vp[15]),(p16,vp[16]),(p17,vp[17]),(p18,vp[18]),(p19,vp[19]),(p20,vp[20]),(p21,vp[21]),(p22,vp[22]),(p23,vp[23]),(p24,vp[24]),(p25,vp[25]),(p26,vp[26]),(p27,vp[27]),(p28,vp[28]),(p29,vp[29]),(p30,vp[30]),(p31,vp[31]),(p32,vp[32]),(p33,vp[33]),(p34,vp[34]),(p35,vp[35]),(p36,vp[36]),(p37,vp[37]),(p38,vp[38]),(p39,vp[39]),(m0,vm[0]),(m1,vm[1]),(m2,vm[2]),(m3,vm[3]),(m4,vm[4]),(m5,vm[5]),(m6,vm[6]),(m7,vm[7]),(m8,vm[8]),(m9,vm[9]),(m10,vm[10]),(m11,vm[11]),(m12,vm[12]),(m13,vm[13]),(m14,vm[14]),(m15,vm[15]),(m16,vm[16]),(m17,vm[17]),(m18,vm[18]),(m19,vm[19]),(m20,vm[20]),(m21,vm[21]),(m22,vm[22]),(m23,vm[23]),(m24,vm[24]),(m25,vm[25]),(m26,vm[26]),(m27,vm[27]),(m28,vm[28]),(m29,vm[29]),(m30,vm[30]),(m31,vm[31]),(m32,vm[32]),(m33,vm[33]),(m34,vm[34]),(m35,vm[35]),(m36,vm[36]),(m37,vm[37]),(m38,vm[38]),(m39,vm[39])])))
 					else:
 						if k > 0:
 							line.append(results.x[5*sum(mnlayers[0:k])+i*5+j])
@@ -3819,12 +3819,12 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 			f.write('      R and R_exp the theoretical and experimental reflectivity respectively.\n')
 
 	print('\n')
-	print("Total calculation time (sec): ", np.int(elapsed_time))
+	print("Total calculation time (sec): ", int(elapsed_time))
 	print(' ')
 
 	if project != 'none':
 		f.write('\n')
-		f.write("Total calculation time (sec): "+str(np.int(elapsed_time)))
+		f.write("Total calculation time (sec): "+str(int(elapsed_time)))
 		f.write('\n')
 
 
@@ -4319,7 +4319,7 @@ def calculate(project,resolution, patches, system, system_param, background, sca
 			for j in range(0,5):
 				if isinstance(system[k][i][j], str):
 					expr = sympy.sympify(system[k][i][j])
-					line.append(np.float(expr.subs([(n,i),(p0,vp[0]),(p1,vp[1]),(p2,vp[2]),(p3,vp[3]),(p4,vp[4]),(p5,vp[5]),(p6,vp[6]),(p7,vp[7]),(p8,vp[8]),(p9,vp[9]),(p10,vp[10]),(p11,vp[11]),(p12,vp[12]),(p13,vp[13]),(p14,vp[14]),(p15,vp[15]),(p16,vp[16]),(p17,vp[17]),(p18,vp[18]),(p19,vp[19]),(p20,vp[20]),(p21,vp[21]),(p22,vp[22]),(p23,vp[23]),(p24,vp[24]),(p25,vp[25]),(p26,vp[26]),(p27,vp[27]),(p28,vp[28]),(p29,vp[29]),(p30,vp[30]),(p31,vp[31]),(p32,vp[32]),(p33,vp[33]),(p34,vp[34]),(p35,vp[35]),(p36,vp[36]),(p37,vp[37]),(p38,vp[38]),(p39,vp[39])])))
+					line.append(float(expr.subs([(n,i),(p0,vp[0]),(p1,vp[1]),(p2,vp[2]),(p3,vp[3]),(p4,vp[4]),(p5,vp[5]),(p6,vp[6]),(p7,vp[7]),(p8,vp[8]),(p9,vp[9]),(p10,vp[10]),(p11,vp[11]),(p12,vp[12]),(p13,vp[13]),(p14,vp[14]),(p15,vp[15]),(p16,vp[16]),(p17,vp[17]),(p18,vp[18]),(p19,vp[19]),(p20,vp[20]),(p21,vp[21]),(p22,vp[22]),(p23,vp[23]),(p24,vp[24]),(p25,vp[25]),(p26,vp[26]),(p27,vp[27]),(p28,vp[28]),(p29,vp[29]),(p30,vp[30]),(p31,vp[31]),(p32,vp[32]),(p33,vp[33]),(p34,vp[34]),(p35,vp[35]),(p36,vp[36]),(p37,vp[37]),(p38,vp[38]),(p39,vp[39])])))
 				else:
 					line.append(system[k][i][j])
 			line.append(system[k][i][5])
@@ -4331,12 +4331,12 @@ def calculate(project,resolution, patches, system, system_param, background, sca
 	#np.set_printoptions(threshold=sys.maxsize)
 	#pprint.pprint(layers)
 
-	q_bin = np.linspace(0.001, np.float(qmax[0]), 1001)
+	q_bin = np.linspace(0.001, float(qmax[0]), 1001)
 	res_bin = np.zeros(np.size(q_bin,0))
 	for i in range(np.size(res_bin,0)):
 		res_bin[i] = resolution[0]
 
-	Refl=Reflectivity(q_bin, res_bin, layers, resolution[0], np.float(background[0]),scale[0],patches,mp)
+	Refl=Reflectivity(q_bin, res_bin, layers, resolution[0], float(background[0]),scale[0],patches,mp)
 
 	Profile=profile(layers, 1000)
 
@@ -5023,7 +5023,7 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 			for j in range(0,5):
 				if isinstance(system[k][i][j], str):
 					expr = sympy.sympify(system[k][i][j])
-					line.append(np.float(expr.subs([(n,i),(p0,vp[0]),(p1,vp[1]),(p2,vp[2]),(p3,vp[3]),(p4,vp[4]),(p5,vp[5]),(p6,vp[6]),(p7,vp[7]),(p8,vp[8]),(p9,vp[9]),(p10,vp[10]),(p11,vp[11]),(p12,vp[12]),(p13,vp[13]),(p14,vp[14]),(p15,vp[15]),(p16,vp[16]),(p17,vp[17]),(p18,vp[18]),(p19,vp[19]),(p20,vp[20]),(p21,vp[21]),(p22,vp[22]),(p23,vp[23]),(p24,vp[24]),(p25,vp[25]),(p26,vp[26]),(p27,vp[27]),(p28,vp[28]),(p29,vp[29]),(p30,vp[30]),(p31,vp[31]),(p32,vp[32]),(p33,vp[33]),(p34,vp[34]),(p35,vp[35]),(p36,vp[36]),(p37,vp[37]),(p38,vp[38]),(p39,vp[39])])))
+					line.append(float(expr.subs([(n,i),(p0,vp[0]),(p1,vp[1]),(p2,vp[2]),(p3,vp[3]),(p4,vp[4]),(p5,vp[5]),(p6,vp[6]),(p7,vp[7]),(p8,vp[8]),(p9,vp[9]),(p10,vp[10]),(p11,vp[11]),(p12,vp[12]),(p13,vp[13]),(p14,vp[14]),(p15,vp[15]),(p16,vp[16]),(p17,vp[17]),(p18,vp[18]),(p19,vp[19]),(p20,vp[20]),(p21,vp[21]),(p22,vp[22]),(p23,vp[23]),(p24,vp[24]),(p25,vp[25]),(p26,vp[26]),(p27,vp[27]),(p28,vp[28]),(p29,vp[29]),(p30,vp[30]),(p31,vp[31]),(p32,vp[32]),(p33,vp[33]),(p34,vp[34]),(p35,vp[35]),(p36,vp[36]),(p37,vp[37]),(p38,vp[38]),(p39,vp[39])])))
 				else:
 					line.append(system[k][i][j])
 			line.append(system[k][i][5])
@@ -5046,14 +5046,14 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 
 	#print(res_bin)
 
-	Refl=Reflectivity(q_bin, res_bin, layers, resolution[0], np.float(background[0]),scale[0],patches,mp)
-	Refl2=Reflectivity(data[:,0], data[:,3], layers, resolution[0], np.float(background[0]),scale[0],patches,mp)
+	Refl=Reflectivity(q_bin, res_bin, layers, resolution[0], float(background[0]),scale[0],patches,mp)
+	Refl2=Reflectivity(data[:,0], data[:,3], layers, resolution[0], float(background[0]),scale[0],patches,mp)
 
 	Profile=profile(layers, 1000)
 
 	Solvent=solvent_penetration(layers, 1000)
 
-	chi_s=chi_square(data, layers, resolution[0], np.float(background[0]),scale[0],patches)
+	chi_s=chi_square(data, layers, resolution[0], float(background[0]),scale[0],patches)
 
 
 	print('\n')
