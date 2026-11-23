@@ -1,7 +1,7 @@
 !************************************************************************************
 SUBROUTINE f_RealRef(mode,q,res,Nlayers,LayerMatrix,fRealRef)    ! Incorporation of Instrumental Resolution in the Reflectivity Calculation
 IMPLICIT NONE
-integer, intent(in) :: mode	                   ! 0 = default (17 points integration), 1 = integration with 2*mode+1 points
+integer, intent(in) :: mode                    ! 0 = default (17 points integration), 1 = integration with 2*mode+1 points
 real*8, intent(in) :: q                       ! neutron wavelength (A)
 real*8, intent(in) :: res                     ! instrumental resolution dq/q
 integer, intent(in) :: Nlayers                 ! Number of layers in the model
@@ -31,18 +31,18 @@ deltaq=q*res/2.354820D0 ! FWHM
 ! Layer Matric calcs
 ! Force the correct branch cut for sqrt below the critical edge by addition of a tiny number
 do j=0,Nlayers+1
-	if(LayerMatrix(Nlayers+1,4).EQ.1.0D0.AND.LayerMatrix(0,4).EQ.0.0D0) then
-    	l1(j)=(LayerMatrix(j,0)*(1.0D0-LayerMatrix(j,4))+LayerMatrix(Nlayers+1,0)*LayerMatrix(j,4))+ii*(LayerMatrix(j,1)*&
+    if(LayerMatrix(Nlayers+1,4).EQ.1.0D0.AND.LayerMatrix(0,4).EQ.0.0D0) then
+        l1(j)=(LayerMatrix(j,0)*(1.0D0-LayerMatrix(j,4))+LayerMatrix(Nlayers+1,0)*LayerMatrix(j,4))+ii*(LayerMatrix(j,1)*&
         (1.0D0-LayerMatrix(j,4))+LayerMatrix(Nlayers+1,1)*LayerMatrix(j,4))-LayerMatrix(0,0)+ii*1e-30
     endif
         
     if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.1.0D0) then
-    	l1(j)=(LayerMatrix(j,0)*(1.0D0-LayerMatrix(j,4))+LayerMatrix(0,0)*LayerMatrix(j,4))+ii*(LayerMatrix(j,1)*&
+        l1(j)=(LayerMatrix(j,0)*(1.0D0-LayerMatrix(j,4))+LayerMatrix(0,0)*LayerMatrix(j,4))+ii*(LayerMatrix(j,1)*&
         (1.0D0-LayerMatrix(j,4))+LayerMatrix(0,1)*LayerMatrix(j,4))-LayerMatrix(0,0)+ii*1e-30
     endif
         
     if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.0.0) then
-    	l1(j)=LayerMatrix(j,0)+ii*LayerMatrix(j,1)-LayerMatrix(0,0)+ii*1e-30
+        l1(j)=LayerMatrix(j,0)+ii*LayerMatrix(j,1)-LayerMatrix(0,0)+ii*1e-30
     endif
 enddo
 
@@ -54,20 +54,20 @@ if(deltaq.EQ.0.0D0) then
     fRealRef=fRealRef+Reflectivity()
 else
     if(mode.EQ.0) then ! integration with midpoint rule, 17 point evaluation
-    	gfact=(1.0D0/(deltaq*sqrt(2.0D0*pi)))
-    	deltaq2=2.0D0*(deltaq**2)
+        gfact=(1.0D0/(deltaq*sqrt(2.0D0*pi)))
+        deltaq2=2.0D0*(deltaq**2)
         do i=-8,8
-        	dx=7.0D0*deltaq/17.0D0
+            dx=7.0D0*deltaq/17.0D0
             qq=q+dble(i)*dx
             gweight=gfact*dexp(-((qq-q)**2)/(deltaq2))*dx
             fRealRef=fRealRef+gweight*Reflectivity()
         enddo
-					
+                    
     else ! integration with midpoint rule, 2*mode+1 points evaluation
-    	gfact=(1.0D0/(deltaq*sqrt(2.0D0*pi)))
-    	deltaq2=2.0D0*(deltaq**2)
+        gfact=(1.0D0/(deltaq*sqrt(2.0D0*pi)))
+        deltaq2=2.0D0*(deltaq**2)
         do i=-mode,mode
-        	dx=7.0D0*deltaq/dble(2*mode+1)
+            dx=7.0D0*deltaq/dble(2*mode+1)
             qq=q+dble(i)*dx
             gweight=gfact*dexp(-((qq-q)**2)/(deltaq2))*dx
             fRealRef=fRealRef+gweight*Reflectivity()
@@ -79,12 +79,11 @@ contains
     !************************************************************************************
     real*8 FUNCTION Reflectivity()   ! Calculation of Reflectivity based on the Matrix Method
     !IMPLICIT NONE
-    COMPLEX*16 kz
-    !COMPLEX*16 k1,k2  ! k_{n},k_{n+1}    
-	COMPLEX*16, dimension(0:Nlayers+1) :: k
+    !COMPLEX*16 k1,k2  ! k_{n},k_{n+1}
+    COMPLEX*16, dimension(0:Nlayers+1) :: k
     COMPLEX*16 b
 
-    COMPLEX*8 r
+    COMPLEX*16 r
     REAL*8 d
     COMPLEX*16 m11,m12,m21,m22
     COMPLEX*16 k11,k12,k21,k22
@@ -93,7 +92,6 @@ contains
     !COMPLEX*16 l1,l2
 
     !INTEGER j                            ! counter
-    COMPLEX*16 kz2
     COMPLEX*16 iixb,cdexpiixb,cdexpmiixb
 
                                                    !  theory: kn=sqrt[kz^2-4pi(rhon-rho0)]
@@ -109,7 +107,7 @@ contains
     !ii=(0.0D0,1.0D0)
     !kz=CMPLX(qq/2.0D0,0.0D0)
     !kz=qq/2.0D0
-	!kz2=kz**2
+    !kz2=kz**2
 
 
     m11=(1.0D0,0.0D0)
@@ -117,12 +115,12 @@ contains
     m21=(0.0D0,0.0D0)
     m22=(1.0D0,0.0D0)
 
-	do j=0,Nlayers+1
-		k(j)=sqrt((qq**2)/4.0D0-4.0D0*pi*l1(j))
-	enddo
+    do j=0,Nlayers+1
+        k(j)=sqrt((qq**2)/4.0D0-4.0D0*pi*l1(j))
+    enddo
 
     do j=0,Nlayers
-		
+        
         r=((k(j)-k(j+1))/(k(j)+k(j+1)))*exp(-2.0D0*k(j)*k(j+1)*LayerMatrix(j,3)**2)
 
         d=LayerMatrix(j,2)
@@ -131,12 +129,12 @@ contains
             b=0.0D0
         else
             b=k(j)*d
-      	endif
+        endif
 
-		iixb=ii*b
-		cdexpiixb=exp(iixb)
-		cdexpmiixb=1.0D0/cdexpiixb !exp(-iixb)
-		
+        iixb=ii*b
+        cdexpiixb=exp(iixb)
+        cdexpmiixb=1.0D0/cdexpiixb !exp(-iixb)
+        
         k11=cdexpiixb
         k12=r*cdexpiixb
         k21=r*cdexpmiixb
@@ -180,35 +178,37 @@ real*8, intent(out) :: fProfile
 INTEGER i,j                                    ! counter
 real*8 zi,lmi1,lmi2,rho
 
+lmi1=0.0D0
+lmi2=0.0D0
 rho=LayerMatrix(0,0)
 do i=2,Nlayers+2
-	zi=0
-	do j=1,i-1
-		zi=zi+LayerMatrix(j-1,2)
-	enddo
+    zi=0
+    do j=1,i-1
+        zi=zi+LayerMatrix(j-1,2)
+    enddo
 
-	if(LayerMatrix(Nlayers+1,4).EQ.1.0D0.AND.LayerMatrix(0,4).EQ.0.0D0) then
-		lmi1=LayerMatrix(i-1,0)*(1.0-LayerMatrix(i-1,4))+LayerMatrix(Nlayers+1,0)*LayerMatrix(i-1,4)
-		lmi2=LayerMatrix(i-2,0)*(1.0-LayerMatrix(i-2,4))+LayerMatrix(Nlayers+1,0)*LayerMatrix(i-2,4)
-	endif
-	if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.1.0D0) then
-		lmi1=LayerMatrix(i-1,0)*(1.0-LayerMatrix(i-1,4))+LayerMatrix(0,0)*LayerMatrix(i-1,4)
-		lmi2=LayerMatrix(i-2,0)*(1.0-LayerMatrix(i-2,4))+LayerMatrix(0,0)*LayerMatrix(i-2,4)
-	endif
-	if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.0.0D0) then
-		lmi1=LayerMatrix(i-1,0)
-		lmi2=LayerMatrix(i-2,0)
-	endif
+    if(LayerMatrix(Nlayers+1,4).EQ.1.0D0.AND.LayerMatrix(0,4).EQ.0.0D0) then
+        lmi1=LayerMatrix(i-1,0)*(1.0-LayerMatrix(i-1,4))+LayerMatrix(Nlayers+1,0)*LayerMatrix(i-1,4)
+        lmi2=LayerMatrix(i-2,0)*(1.0-LayerMatrix(i-2,4))+LayerMatrix(Nlayers+1,0)*LayerMatrix(i-2,4)
+    endif
+    if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.1.0D0) then
+        lmi1=LayerMatrix(i-1,0)*(1.0-LayerMatrix(i-1,4))+LayerMatrix(0,0)*LayerMatrix(i-1,4)
+        lmi2=LayerMatrix(i-2,0)*(1.0-LayerMatrix(i-2,4))+LayerMatrix(0,0)*LayerMatrix(i-2,4)
+    endif
+    if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.0.0D0) then
+        lmi1=LayerMatrix(i-1,0)
+        lmi2=LayerMatrix(i-2,0)
+    endif
 
-	if(LayerMatrix(i-2,3).NE.0.0D0) then
-		rho=rho+((lmi1-lmi2)/2.0D0)*(1.0D0+erf((z-zi)/(sqrt(2.0D0)*LayerMatrix(i-2,3))))
-	else
-		if(z.GE.zi) then
-			rho=rho+((lmi1-lmi2)/2.0D0)*(2.0D0)
-		else
-			rho=rho+0.0D0	
-		endif
-	endif
+    if(LayerMatrix(i-2,3).NE.0.0D0) then
+        rho=rho+((lmi1-lmi2)/2.0D0)*(1.0D0+erf((z-zi)/(sqrt(2.0D0)*LayerMatrix(i-2,3))))
+    else
+        if(z.GE.zi) then
+            rho=rho+((lmi1-lmi2)/2.0D0)*(2.0D0)
+        else
+            rho=rho+0.0D0   
+        endif
+    endif
 enddo
 
 fProfile=rho
@@ -236,38 +236,40 @@ real*8, intent(out) :: fsolvent
 real*8 rho,zi,lmi1,lmi2
 integer i,j
 
+lmi1=0.0D0
+lmi2=0.0D0
 
 if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.0.0D0) then
-	rho=0.0
+    rho=0.0
 else
-	if(LayerMatrix(Nlayers+1,4).EQ.1.0D0.AND.LayerMatrix(0,4).EQ.0.0D0) rho=0.0
-	if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.1.0D0) rho=1.0
+    if(LayerMatrix(Nlayers+1,4).EQ.1.0D0.AND.LayerMatrix(0,4).EQ.0.0D0) rho=0.0
+    if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.1.0D0) rho=1.0
 
-	do i=2,Nlayers+2
-		zi=0
-		do j=1,i-1
-			zi=zi+LayerMatrix(j-1,2)
-		enddo
+    do i=2,Nlayers+2
+        zi=0
+        do j=1,i-1
+            zi=zi+LayerMatrix(j-1,2)
+        enddo
 
-		if(LayerMatrix(Nlayers+1,4).EQ.1.0D0.AND.LayerMatrix(0,4).EQ.0.0D0) then
-			lmi1=LayerMatrix(i-1,4)
-			lmi2=LayerMatrix(i-2,4)
-		endif
-		if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.1.0D0) then
-			lmi1=LayerMatrix(i-1,4)
-			lmi2=LayerMatrix(i-2,4)
-		endif
+        if(LayerMatrix(Nlayers+1,4).EQ.1.0D0.AND.LayerMatrix(0,4).EQ.0.0D0) then
+            lmi1=LayerMatrix(i-1,4)
+            lmi2=LayerMatrix(i-2,4)
+        endif
+        if(LayerMatrix(Nlayers+1,4).EQ.0.0D0.AND.LayerMatrix(0,4).EQ.1.0D0) then
+            lmi1=LayerMatrix(i-1,4)
+            lmi2=LayerMatrix(i-2,4)
+        endif
 
-		if(LayerMatrix(i-2,3).NE.0.0D0) then
-			rho=rho+((lmi1-lmi2)/2.0)*(1.0+erf((z-zi)/(sqrt(2.0)*LayerMatrix(i-2,3))))
-		else
-			if(z.GT.zi) then
-				rho=rho+((lmi1-lmi2)/2.0)*(2.0)
-			else
-				rho=rho+0.0D0
-			endif
-		endif	
-	enddo
+        if(LayerMatrix(i-2,3).NE.0.0D0) then
+            rho=rho+((lmi1-lmi2)/2.0)*(1.0+erf((z-zi)/(sqrt(2.0)*LayerMatrix(i-2,3))))
+        else
+            if(z.GT.zi) then
+                rho=rho+((lmi1-lmi2)/2.0)*(2.0)
+            else
+                rho=rho+0.0D0
+            endif
+        endif   
+    enddo
 
 endif
 
