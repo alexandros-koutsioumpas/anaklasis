@@ -73,7 +73,7 @@ class build_py(_build_py):
 
 setup(
     name='anaklasis',
-    version='1.6.0',
+    version='1.6.2',
     author='Alexandros Koutsioumpas',
     author_email='a.koutsioumpas@fz-juelich.de',
     description='Neutron and X-ray reflectivity calculations',
