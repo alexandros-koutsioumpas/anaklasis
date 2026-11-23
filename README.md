@@ -14,6 +14,8 @@ It is adviced to install a _FORTRAN_ compiler on your system before proceeding w
 
 Note that calculations with _Numba_ are 30-40% slower than with the _FORTRAN_ extensions, while _Python_ calculation engine without _Numba_ installed can be more than 20-30 times slower than the _FORTRAN_ extensions.
 
+Many thanks to Andrew Nelson for the modernization of the setup code and small bug corrections for compatibility with newer NumPy versions.
+
 **Linux**
 
 - Install _Python_ >= 3.7 and optionally _gfortran_ 
@@ -53,10 +55,8 @@ Note that if you prefer you may use [MacPorts](https://www.macports.org) or [Hom
 **Windows 10 (_Numba_)**
 
 - Install _python_ >= 3.7 from [python.org](https://www.python.org/downloads/) and do not forget to include _python_ in the systen path.
-- Install _NumPy_ and upgrade _setuptools_
+- Install _NumPy_
 ```bash
-py -m pip install --upgrade pip setuptools
-
 py -m pip install numpy
 ```
 - Download the latest _anaklasis_ release, navigate to the proper folder and install thought the command prompt
