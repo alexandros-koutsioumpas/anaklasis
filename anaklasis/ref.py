@@ -3269,7 +3269,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 						plt.plot(Solvent[curve][i][:,0],Solvent[curve][i][:,1],color='orange',linestyle=plinestyle[i])
 			plt.ylabel('solvent',color='orange')
 
-		ax1.get_shared_x_axes().join(ax1, ax3)
+		ax1.sharex(ax3)
 		plt.tight_layout()
 		plt.draw() 
 		plt.savefig(project+'_fit_summary.pdf')
@@ -3312,7 +3312,7 @@ def fit(project, in_file, units, fit_mode,fit_weight, method, resolution, patche
 			plt.ylabel(r'$\Delta / \sigma$')
 		else:
 			plt.ylabel(r'$\Delta / R$')
-		ax1.get_shared_x_axes().join(ax1, ax2)
+		ax1.sharex(ax2)
 		plt.tight_layout()
 		plt.draw() 
 		plt.savefig(project+'_fit_reflectivity.pdf')
@@ -5215,7 +5215,7 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 		#plt.plot(Solvent[:,0],Solvent[:,1],color='green')
 		#plt.xlabel(r'$z(\AA)$')
 		#plt.ylabel('solvent')
-		ax1.get_shared_x_axes().join(ax1, ax3)
+		ax1.sharex(ax3)
 		plt.tight_layout()
 		plt.draw() 
 		plt.savefig(project+'_summary.pdf')
@@ -5246,7 +5246,7 @@ def compare(project, in_file, units, resolution, patches, system, system_param, 
 		else:
 			plt.ylabel(r'$\Delta / R$')
 		plt.xlabel(r'$Q(\AA^{-1})$')	
-		ax1.get_shared_x_axes().join(ax1, ax3)
+		ax1.sharex(ax3)
 		plt.tight_layout()
 		plt.draw() 
 		plt.savefig(project+'_reflectivity.pdf')
