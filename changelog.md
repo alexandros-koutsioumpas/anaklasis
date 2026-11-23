@@ -1,5 +1,9 @@
 # anaklasis changelog
 
+## Version 1.6.2 (November 2026)
+
+- Modernised setup. Compatibility with later versions of NumPy and Matplotlib.
+
 ## Version 1.6.0 (September 2021)
 
 - Introduction of additional _Python_ reflectivity calculation engine (accelarated with _Numba_), so that now a FORTRAN compiler is not necessary for installation of the package (although recommended). 
