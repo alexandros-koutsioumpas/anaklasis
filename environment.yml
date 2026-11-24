@@ -4,7 +4,7 @@ dependencies:
     - matplotlib
     - scipy
     - numdifftools
-    - sympy
+    - sympy=1.7.1
     - emcee
     - tqdm
     - corner
