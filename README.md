@@ -16,6 +16,8 @@ Note that calculations with _Numba_ are 30-40% slower than with the _FORTRAN_ ex
 
 Many thanks to Andrew Nelson for the modernization of the setup code and small bug corrections for compatibility with newer NumPy versions.
 
+**Important!!!** Install SymPy version 1.7.1 for full compatibility with the current version of Anaklasis. A future update will provide compatibility with newer versions of SymPy.
+
 **Linux**
 
 - Install _Python_ >= 3.7 and optionally _gfortran_ 
