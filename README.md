@@ -59,7 +59,7 @@ Note that if you prefer you may use [MacPorts](https://www.macports.org) or [Hom
 - Install _python_ >= 3.9 from [python.org](https://www.python.org/downloads/) and do not forget to include _python_ in the systen path.
 - Install _NumPy_ and other necessary packages
 ```bash
-py -m pip install setuptools numpy scipy matplotlib numdifftools tqdm corner sympy==1.7.1
+py -m pip install setuptools numpy scipy matplotlib numdifftools tqdm corner emcee sympy==1.7.1
 ```
 - Download the latest _anaklasis_ release, navigate to the proper folder and install thought the command prompt
 
