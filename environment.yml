@@ -1,10 +1,10 @@
 dependencies:
-    - python=3.13
+    - python=3.9
     - numpy
     - matplotlib
     - scipy
     - numdifftools
-    - sympy<=1.7.1
+    - sympy=1.7.1
     - emcee
     - tqdm
     - corner
