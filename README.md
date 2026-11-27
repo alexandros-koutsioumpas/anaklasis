@@ -24,6 +24,7 @@ Many thanks to Andrew Nelson for the modernization of the setup code and small b
 - Install _NumPy_ and other necessary packages
 ```bash
 python3 -m pip install numpy setuptools scipy matplotlib numdifftools tqdm corner emcee sympy==1.7.1
+```
 - then download the latest _anaklasis_ release, unzip the archive and install throught the terminal
 
 ```bash
